@@ -11,3 +11,7 @@ initialize-enviroment.sh
 ```
 which will install TensorFlow locally in the development sandbox.
 
+# Project Progress and Tracking
+A [Trello Board](https://trello.com/b/RLBbTfDf/tcb-drone-survey) is being used 
+for project progress and task tracking. 
+
