@@ -20,8 +20,13 @@ IS_INSTALLED=$(python -c "import tensorflow as tf; print(tf.__version__)"  | gre
 
 if [[ $IS_INSTALLED -gt 0 ]] then
     echo "Installation Successful"
-    exit 0
 else
     echo "Installation unsuccessful"
     exit 1
 fi
+
+# Get and unpack the training data 
+#wget 
+printf "Download training data at: https://mega.nz/file/nxxWFT6Y#rBb-YZ8G2Q8OAEPg9swbxAAWKfhjdtvx2pC4IlthqkU\n" 
+
+exit 0
