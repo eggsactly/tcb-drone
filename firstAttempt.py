@@ -6,12 +6,11 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 print(tf.__version__)
 
-
+class_labels = ['Ironwood', 'Mesquite', 'PaloVerde']
 train_path = 'Data/'
-train_batches = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input).flow_from_directory(directory=train_path,target_size=(224,224), classes=['Ironwood', 'Mesquite', 'PaloVerde'], batch_size=6)
+train_batches = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input).flow_from_directory(directory=train_path,target_size=(224,224), classes=class_labels, batch_size=6)
 
-
-# Load the dataset
+test_batch = ImageDataGenerator(preprocessing_function=tf.keras.applications.vgg16.preprocess_input).flow_from_directory(directory=train_path,target_size=(224,224), classes=['test'])
 
 # Build a machine learning model
 # Sequential is useful for stacking layers where each layer has one input
@@ -41,12 +40,15 @@ model.fit(x=train_batches, epochs=2, verbose=2)
 #model.evaluate(x_test,  y_test, verbose=2)
 
 # If you want your model to return a probability, you can wrap the trained model, and attach the softmax to it:
-#probability_model = tf.keras.Sequential([
-#  model,
-#  tf.keras.layers.Softmax()
-#])
+probability_model = tf.keras.Sequential([
+  model,
+  tf.keras.layers.Softmax()
+])
 
-# For more examples of using Keras, check out the tutorials. To learn more about building models with Keras, read the guides. If you want learn more about loading and preparing data, see the tutorials on image data loading or CSV data loading.
-#probability_model(x_test[:5])
+raw_predict = model.predict(test_batch)
+print(raw_predict)
 
+predictions = probability_model.predict(test_batch)
+print(predictions)
 
+print(class_labels)
