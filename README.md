@@ -7,7 +7,7 @@ This git project implements neural networks and machine learning to identify tre
 # Setup
 Once this repo is cloned, developers may setup their development enviroment by running
 ```
-initialize-enviroment.sh
+./initialize-enviroment.sh
 ```
 which will install TensorFlow locally in the development sandbox.
 
