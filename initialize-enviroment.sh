@@ -35,6 +35,7 @@ if [[ $IS_INSTALLED -eq 0 ]] then
     fi
 fi
 
+# Ask the user if they want to be directed to the training set 
 HAS_ZENITY=$(which zenity | wc -l)
 
 if [[ $HAS_ZENITY -gt 0 ]] then
