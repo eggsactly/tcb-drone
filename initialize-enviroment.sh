@@ -9,24 +9,53 @@
 # This script should be run just once, after the repo has been cloned and 
 # before any python scripts are run. 
 
-# Get tensorflow (CPU Version) 
-python3 -m venv tensorflow 
-source tensorflow/bin/activate 
-pip install --upgrade pip 
-pip install --upgrade tensorflow 
-
 # Verify installation 
-IS_INSTALLED=$(python -c "import tensorflow as tf; print(tf.__version__)"  | grep -Po "[0-9]+\.[0-9]+\.[0-9]+"  | wc -l)
+IS_INSTALLED=0
+if [ -f tensorflow/bin/activate  ]; then
+    source tensorflow/bin/activate
+    IS_INSTALLED=$(python -c "import tensorflow as tf; print(tf.__version__)"  | grep -Po "[0-9]+\.[0-9]+\.[0-9]+"  | wc -l)
+fi
 
-if [[ $IS_INSTALLED -gt 0 ]] then
-    echo "Installation Successful"
+# If not already installed, get tensor flow 
+if [[ $IS_INSTALLED -eq 0 ]] then
+    # Get tensorflow (CPU Version) 
+    python3 -m venv tensorflow 
+    source tensorflow/bin/activate 
+    pip install --upgrade pip 
+    pip install --upgrade tensorflow 
+    
+    # Verify installation 
+    IS_INSTALLED=$(python -c "import tensorflow as tf; print(tf.__version__)"  | grep -Po "[0-9]+\.[0-9]+\.[0-9]+"  | wc -l)
+
+    if [[ $IS_INSTALLED -gt 0 ]] then
+        echo "Installation Successful"
+    else
+        echo "Installation unsuccessful"
+        exit 1
+    fi
+fi
+
+HAS_ZENITY=$(which zenity | wc -l)
+
+if [[ $HAS_ZENITY -gt 0 ]] then
+    zenity --question --text="Can we open a web browser to point you to the training set?"
+    USER_RESPONSE=$?
 else
-    echo "Installation unsuccessful"
-    exit 1
+    printf "Can we open a web browser to point you to the training set? (y/N)"
+    read USER_RESPONSE 
+    if [[ $USER_RESPONSE == "y" ]] then
+        USER_RESPONSE=0
+    else
+        USER_RESPONSE=1
+    fi
 fi
 
 # Get and unpack the training data 
 #wget 
-printf "Download training data at: https://mega.nz/file/nxxWFT6Y#rBb-YZ8G2Q8OAEPg9swbxAAWKfhjdtvx2pC4IlthqkU\n" 
-
+if [[ $USER_RESPONSE -eq 0 ]] then
+    xdg-open https://mega.nz/file/nxxWFT6Y#rBb-YZ8G2Q8OAEPg9swbxAAWKfhjdtvx2pC4IlthqkU
+else
+    printf "Download training data at: https://mega.nz/file/nxxWFT6Y#rBb-YZ8G2Q8OAEPg9swbxAAWKfhjdtvx2pC4IlthqkU\n" 
+fi
 exit 0
+
