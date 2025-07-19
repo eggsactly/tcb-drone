@@ -1,19 +1,107 @@
 #!./tensorflow/bin/python
 
 import tensorflow as tf
+import sys
+from os import walk
+import cv2
+import numpy as np
 
 print(tf.__version__)
 
 # Import TensorFLow into your program to get started 
 mnist = tf.keras.datasets.mnist
 
-# Load the dataset
-# Load and prepare the MNIST dataset. The pixel values of the images range from
-# 0 through 255. Scale these values to a range of 0 to 1 by dividing the values
-# by 255.0. This also converts the sample data from integers to floating-point
-# numbers. 
-(x_train, y_train), (x_test, y_test) = mnist.load_data()
-x_train, x_test = x_train / 255.0, x_test / 255.0
+# Load the dataset, look in the 'Lables' directory and find the 
+# DJI_0022.txt files and correlate them with the 
+# DJI_0022.JPG files
+
+TrainingSetPath="Labels"
+
+textFileList = []
+jpgFileList = [] 
+for (dirpath, dirnames, filenames) in walk(TrainingSetPath):
+    for filename in filenames:
+        lastPeriod=filename.rfind('.')
+        if lastPeriod > 0:
+            if filename[lastPeriod:].lower() == ".txt":
+                textFileList.append(filename)
+            elif filename[lastPeriod:].lower() == ".jpg":
+                jpgFileList.append(filename)
+
+# xyFileList contains a dictionary, associating image file with text file 
+xyFileList = []
+
+for x in textFileList:
+    xLastPeriod=x.rfind('.')
+    for y in jpgFileList:
+        yLastPeriod=y.rfind('.')
+        if x[:xLastPeriod] == y[:yLastPeriod]:
+            xyFileList.append({'image': y, 'text':x})
+
+
+# Open each text file and get the first character before the first space and 
+# put it in the y_train list 
+y_train = [] 
+maxNum = 0
+
+# Fetch the first value from the input file 
+for x in xyFileList: 
+    number_str = ""
+    with open(TrainingSetPath + "/" + x["text"]) as f:
+        while True:
+            c = f.read(1)
+            if not c or c == ' ':
+                break
+            else:
+                number_str = number_str + c
+    number_int = int(number_str)
+    x['y_train_index'] = number_int
+    if number_int > maxNum:
+        maxNum = number_int
+
+# Set the index size for later on 
+maxNum = maxNum + 1
+imgHeight = 0
+imgWidth = 0
+
+# Use OpenCV NumPy interface, gotten from: 
+# https://stackoverflow.com/questions/7762948/how-to-convert-an-rgb-image-to-numpy-array
+for x in xyFileList:
+    imageFilePath = TrainingSetPath + "/" + x["image"]
+    print("Reading in: " + imageFilePath)
+    im = cv2.imread(imageFilePath, cv2.COLOR_BGR2RGB) 
+    
+    if imgHeight == 0:
+        imgHeight = np.size(im, 0)
+        imgWidth = np.size(im, 1)
+    elif np.size(im, 0) != imgHeight or imgWidth != np.size(im, 1):
+        print("Error: Image height is not like the rest " + str(np.size(im, 0) + " != " + str(imgHeight) + " or " + str(np.size(im, 1)) + " != " + str(imgWidth)))
+        sys.exit(1)
+    
+    x["x_train"] = im
+
+# Create the y_train array, it is an array of arrays of floats, the size of 
+# the second array is the number of different trees we're identifying. 
+# Each index represents a probability of it being the designated tree in the 
+# classes.txt file 
+for x in xyFileList: 
+    array = np.zeros(maxNum, dtype=float)
+    array[x['y_train_index']] = 1.0
+    x["y_train"] = array
+
+
+
+x_train = np.empty([])
+y_train = np.empty([])
+
+# Populate the arrays 
+for n in xyFileList:
+    np.append(x_train, n["x_train"])
+    np.append(y_train, n["y_train"])
+
+print(str(x_train.ndim))
+
+sys.exit(0)
 
 # Build a machine learning model
 # Sequential is useful for stacking layers where each layer has one input
@@ -22,7 +110,7 @@ x_train, x_test = x_train / 255.0, x_test / 255.0
 # models are composed of layers. This model uses the Flatten, Dense, and Dropout
 # layers. 
 model = tf.keras.models.Sequential([
-  tf.keras.layers.Flatten(input_shape=(28, 28)),
+  tf.keras.layers.Flatten(input_shape=(imgHeight, imgWidth, 3)),
   tf.keras.layers.Dense(128, activation='relu'),
   tf.keras.layers.Dropout(0.2),
   tf.keras.layers.Dense(10)
@@ -54,7 +142,7 @@ model.compile(optimizer='adam',
 model.fit(x_train, y_train, epochs=5)
 
 # The Model.evaluate method checks the model's performance, usually on a validation set or test set.
-model.evaluate(x_test,  y_test, verbose=2)
+# model.evaluate(x_test,  y_test, verbose=2)
 
 # The image classifier is now trained to ~98% accuracy on this dataset. To learn more, read the TensorFlow tutorials.
 
