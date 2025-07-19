@@ -23,6 +23,7 @@ if [[ $IS_INSTALLED -eq 0 ]] then
     source tensorflow/bin/activate 
     pip install --upgrade pip 
     pip install --upgrade tensorflow 
+    pip install opencv-python
     
     # Verify installation 
     IS_INSTALLED=$(python -c "import tensorflow as tf; print(tf.__version__)"  | grep -Po "[0-9]+\.[0-9]+\.[0-9]+"  | wc -l)
