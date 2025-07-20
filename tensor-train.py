@@ -16,6 +16,11 @@ mnist = tf.keras.datasets.mnist
 # DJI_0022.JPG files
 
 TrainingSetPath="Labels"
+checkpoint_path = "TreeIdentifyTensorFlowModel.weights.h5"
+
+
+# Amount to scale input images by per axis
+imageScaleFactor=0.25
 
 textFileList = []
 jpgFileList = [] 
@@ -55,7 +60,9 @@ for x in xyFileList:
             else:
                 number_str = number_str + c
     number_int = int(number_str)
-    x['y_train_index'] = number_int
+    #x['y_train_index'] = number_int
+    x['y_train'] = number_int
+    y_train.append(number_int)
     if number_int > maxNum:
         maxNum = number_int
 
@@ -70,7 +77,10 @@ for x in xyFileList:
     imageFilePath = TrainingSetPath + "/" + x["image"]
     print("Reading in: " + imageFilePath)
     im = cv2.imread(imageFilePath, cv2.COLOR_BGR2RGB) 
+    # scale image to be 1/16 the size
+    im = cv2.resize(im, (0,0), fx=imageScaleFactor, fy=imageScaleFactor) 
     
+    # Check to make sure all images are the same size 
     if imgHeight == 0:
         imgHeight = np.size(im, 0)
         imgWidth = np.size(im, 1)
@@ -79,29 +89,34 @@ for x in xyFileList:
         sys.exit(1)
     
     x["x_train"] = im
+    #print(str(x["x_train"]))
+
+print("Height: " + str(imgHeight) + " Width: " + str(imgWidth))
 
 # Create the y_train array, it is an array of arrays of floats, the size of 
 # the second array is the number of different trees we're identifying. 
 # Each index represents a probability of it being the designated tree in the 
 # classes.txt file 
-for x in xyFileList: 
-    array = np.zeros(maxNum, dtype=float)
-    array[x['y_train_index']] = 1.0
-    x["y_train"] = array
+#for x in xyFileList: 
+#    array = np.zeros(maxNum, dtype=float)
+#    array[x['y_train_index']] = 1.0
+#    x["y_train"] = array
 
+numImages = len(xyFileList)
 
+# Populate the x train and y train arrays 
+x_train = np.vstack([[xyFileList[0]["x_train"]]])
+y_train = np.array(y_train)
 
-x_train = np.empty([])
-y_train = np.empty([])
+count = 0 
+for n in xyFileList[1:]:
+    x_train = np.vstack([x_train, [n["x_train"]]])
 
-# Populate the arrays 
-for n in xyFileList:
-    np.append(x_train, n["x_train"])
-    np.append(y_train, n["y_train"])
-
-print(str(x_train.ndim))
-
-sys.exit(0)
+# Verify dimensions 
+if y_train.ndim != 1:
+    sys.exit(1)
+if x_train.ndim != 4:
+    sys.exit(1)
 
 # Build a machine learning model
 # Sequential is useful for stacking layers where each layer has one input
@@ -113,8 +128,10 @@ model = tf.keras.models.Sequential([
   tf.keras.layers.Flatten(input_shape=(imgHeight, imgWidth, 3)),
   tf.keras.layers.Dense(128, activation='relu'),
   tf.keras.layers.Dropout(0.2),
-  tf.keras.layers.Dense(10)
+  tf.keras.layers.Dense(maxNum)
 ])
+
+print(str(model.summary()))
 
 # For each example, the model returns a vector of logits or log-odds scores, 
 # one for each class. 
@@ -130,7 +147,7 @@ loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 #The loss function takes a vector of ground truth values and a vector of logits and returns a scalar loss for each example. This loss is equal to the negative log probability of the true class: The loss is zero if the model is sure of the correct class.
 
 # This untrained model gives probabilities close to random (1/10 for each class), so the initial loss should be close to -tf.math.log(1/10) ~= 2.3.
-loss_fn(y_train[:1], predictions).numpy()
+loss_fn(y_train[:1], predictions[0]).numpy()
 
 # Before you start training, configure and compile the model using Keras Model.compile. Set the optimizer class to adam, set the loss to the loss_fn function you defined earlier, and specify a metric to be evaluated for the model by setting the metrics parameter to accuracy.
 model.compile(optimizer='adam',
@@ -155,6 +172,7 @@ probability_model = tf.keras.Sequential([
 #Congratulations! You have trained a machine learning model using a prebuilt dataset using the Keras API.
 
 # For more examples of using Keras, check out the tutorials. To learn more about building models with Keras, read the guides. If you want learn more about loading and preparing data, see the tutorials on image data loading or CSV data loading.
-probability_model(x_test[:5])
+#probability_model(x_test[:5])
 
+model.save_weights(checkpoint_path)
 
