@@ -16,7 +16,7 @@ mnist = tf.keras.datasets.mnist
 # DJI_0022.JPG files
 
 TrainingSetPath="Labels"
-checkpoint_path = "TreeIdentifyTensorFlowModel.weights.h5"
+checkpoint_path = "TreeIdentifyTensorFlowModel.keras"
 
 
 # Amount to scale input images by per axis
@@ -174,5 +174,5 @@ probability_model = tf.keras.Sequential([
 # For more examples of using Keras, check out the tutorials. To learn more about building models with Keras, read the guides. If you want learn more about loading and preparing data, see the tutorials on image data loading or CSV data loading.
 #probability_model(x_test[:5])
 
-model.save_weights(checkpoint_path)
+model.save(checkpoint_path)
 
