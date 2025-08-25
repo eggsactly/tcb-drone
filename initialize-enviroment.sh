@@ -21,7 +21,7 @@ if [[ $1 == "GPU" ]]; then
         # Check that a GPU device is listed
         GPU_DEVICE=$(python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))" | grep -Po "\[PhysicalDevice\(.*\)\]")
         echo "GPU Device Found: ${GPU_DEVICE}"
-        if [[ -n "{GPU_DEVICE}" ]]; then
+        if [[ -n "${GPU_DEVICE}" ]]; then
             IS_INSTALLED=1
         fi
     }
