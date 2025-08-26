@@ -3,3 +3,5 @@ Labels
 *.h5
 *.zip
 *.keras
+querycount.txt
+streetview-images/
