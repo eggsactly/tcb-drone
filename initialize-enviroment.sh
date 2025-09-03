@@ -17,6 +17,7 @@ TRAINING_SET=Labels-20250715T043403Z-1-001.zip
 
 # Verify installation 
 IS_INSTALLED=0
+tf_ver=""
 
 if [[ $1 == "GPU" ]]; then
     tf_ver="tensorflow[and-cuda]"
