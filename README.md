@@ -16,6 +16,17 @@ If the developer wishes to employ a GPU to accelerate training runtimes, and is 
 ./initialize-enviroment.sh GPU
 ```
 
+## Uploading new data
+First create your `password.json` file in the following format
+```
+{
+    "aws_access_key_id":"________________",
+    "aws_secret_access_key": "_____________"
+}
+```
+
+Second, upload a new file to the Digital Ocean spaces with the command 
+`space-connect.py [path-to-file]`
 
 # Project Progress and Tracking
 A [Trello Board](https://trello.com/b/RLBbTfDf/tcb-drone-survey) is being used 
