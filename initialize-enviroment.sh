@@ -12,11 +12,33 @@
 # Name of the training set file, this may change PR to PR. 
 TRAINING_SET=Labels-20250715T043403Z-1-001.zip
 
+# Run with GPU arg to set up tensorflow with cuda. To download cuda toolkit, reference:
+# https://docs.nvidia.com/cuda/cuda-installation-guide-linux
+
 # Verify installation 
 IS_INSTALLED=0
+
+if [[ $1 == "GPU" ]]; then
+    tf_ver="tensorflow[and-cuda]"
+    check_tf_installed () {
+        # Check that a GPU device is listed
+        GPU_DEVICE=$(python -c "import tensorflow as tf; print(tf.config.list_physical_devices('GPU'))" | grep -Po "\[PhysicalDevice\(.*\)\]")
+        echo "GPU Device Found: ${GPU_DEVICE}"
+        if [[ -n "${GPU_DEVICE}" ]]; then
+            IS_INSTALLED=1
+        fi
+    }
+else
+    tf_ver="tensorflow"
+    check_tf_installed () {
+       # Verify installation 
+        IS_INSTALLED=$(python -c "import tensorflow as tf; print(tf.__version__)"  | grep -Po "[0-9]+\.[0-9]+\.[0-9]+"  | wc -l)
+    }
+fi
+
 if [ -f tensorflow/bin/activate  ]; then
     source tensorflow/bin/activate
-    IS_INSTALLED=$(python -c "import tensorflow as tf; print(tf.__version__)"  | grep -Po "[0-9]+\.[0-9]+\.[0-9]+"  | wc -l)
+    check_tf_installed
 fi
 
 # If not already installed, get tensor flow 
@@ -27,14 +49,14 @@ if [[ $IS_INSTALLED -eq 0 ]] then
     python3 -m venv tensorflow 
     source tensorflow/bin/activate 
     pip install --upgrade pip 
-    pip install --upgrade tensorflow 
+    pip install --upgrade ${tf_ver}
     pip install opencv-python
     pip install pyyaml h5py  # Required to save models in HDF5 format
     pip install botocore 
     pip install boto3
     
     # Verify installation 
-    IS_INSTALLED=$(python -c "import tensorflow as tf; print(tf.__version__)"  | grep -Po "[0-9]+\.[0-9]+\.[0-9]+"  | wc -l)
+    check_tf_installed
 
     if [[ $IS_INSTALLED -gt 0 ]] then
         echo "Installation Successful"
