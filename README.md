@@ -11,6 +11,12 @@ Once this repo is cloned, developers may setup their development enviroment by r
 ```
 which will install TensorFlow locally in the development sandbox.
 
+If the developer wishes to employ a GPU to accelerate training runtimes, and is on a system that uses an nVidia GPU and has CUDA installed, the developer may setup their development enviroment by running: 
+```
+./initialize-enviroment.sh GPU
+```
+
+
 # Project Progress and Tracking
 A [Trello Board](https://trello.com/b/RLBbTfDf/tcb-drone-survey) is being used 
 for project progress and task tracking. 
