@@ -5,3 +5,4 @@ Labels
 *.keras
 querycount.txt
 streetview-images/
+numqueries.txt
