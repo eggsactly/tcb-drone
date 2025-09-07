@@ -59,28 +59,8 @@ if [[ $IS_INSTALLED -eq 0 ]] then
     fi
 fi
 
-# Ask the user if they want to be directed to the training set 
-HAS_ZENITY=$(which zenity | wc -l)
+wget https://tcb-drone.sfo3.digitaloceanspaces.com/Labels-20250715T043403Z-1-001.zip
 
-if [[ $HAS_ZENITY -gt 0 ]] then
-    zenity --question --text="Can we open a web browser to point you to the training set?"
-    USER_RESPONSE=$?
-else
-    printf "Can we open a web browser to point you to the training set? (y/N)"
-    read USER_RESPONSE 
-    if [[ $USER_RESPONSE == "y" ]] then
-        USER_RESPONSE=0
-    else
-        USER_RESPONSE=1
-    fi
-fi
+unzip Labels-20250715T043403Z-1-001.zip
 
-# Get and unpack the training data 
-#wget 
-if [[ $USER_RESPONSE -eq 0 ]] then
-    xdg-open https://mega.nz/file/nxxWFT6Y#rBb-YZ8G2Q8OAEPg9swbxAAWKfhjdtvx2pC4IlthqkU
-else
-    printf "Download training data at: https://mega.nz/file/nxxWFT6Y#rBb-YZ8G2Q8OAEPg9swbxAAWKfhjdtvx2pC4IlthqkU\n" 
-fi
-exit 0
 
