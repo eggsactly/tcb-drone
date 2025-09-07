@@ -3,7 +3,7 @@
 # Script for getting random Tucson, AZ streetview images to tag and train tree detection on
 # Useful docs:
 # https://medium.com/@seelcs12/querying-google-streetview-images-with-python-f486910d0345
-# https://googlemaps.github.io/google-maps-services-python/docs/index.html
+# https://developers.google.com/maps/documentation/streetview/request-streetview
 
 import requests
 import os
