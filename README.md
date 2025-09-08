@@ -26,7 +26,7 @@ First create your `password.json` file in the following format
 ```
 
 Second, upload a new file to the Digital Ocean spaces with the command 
-`space-connect.py [path-to-file]`
+`space-upload.py [path-to-file]`
 
 # Project Progress and Tracking
 A [Trello Board](https://trello.com/b/RLBbTfDf/tcb-drone-survey) is being used 
