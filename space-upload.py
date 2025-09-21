@@ -27,18 +27,63 @@ with open("password.json", "r") as file:
 
     #client.create_bucket(Bucket='tcb-drone')
 
-    print(str(client))
+    #print(str(client))
     # List all buckets on your account.
     response = client.list_buckets()
     spaces = [space['Name'] for space in response['Buckets']]
-    print(str(response))
-
+    print(str(spaces))
+    
+    print("Uploading: " + str(sys.argv[1]))
+    
+    # Upload the desired file 
+    
     # Step 3: Call the put_object command and specify the file to upload.
-    client.put_object(Bucket='tcb-drone', # The path to the directory you want to upload the object to, starting with your Space name.
-                      Key=str(sys.argv[1]), # Object key, referenced whenever you want to access this file later.
-                      Body=b'Hello, World!', # The object's contents.
-                      ACL='private', # Defines Access-control List (ACL) permissions, such as private or public.
-                      Metadata={ # Defines metadata tags.
-                          'x-amz-meta-my-key': 'your-value'
-                      }
-                    )
+    client.upload_file(str(sys.argv[1]), 'tcb-drone', str(sys.argv[1]), ExtraArgs={'ACL':'public-read'})
+        
+    # Get the list of files 
+    
+    response = client.list_objects_v2(
+        Bucket='tcb-drone',
+        Delimiter=' ',
+        EncodingType='url'
+    )
+    
+    fileList = []
+    for entry in response['Contents']:
+        fileList.append(entry['Key'])
+    
+    # Create an HTML file to list the files 
+    
+    try:             
+        with open("index.html", "w") as f:
+            try:
+                f.write("<!DOCTYPE html>")
+                f.write("<html>")
+                f.write("<body>")
+                f.write("<h1>File Listing</h1>")
+                for entry in fileList:
+                    f.write("<p><a href=\"https://tcb-drone.sfo3.digitaloceanspaces.com/" + str(entry) + "\">https://tcb-drone.sfo3.digitaloceanspaces.com/" + str(entry) + "</a></p>")
+
+                f.write("</body>")
+                f.write("</html>")
+            except IOError as e:
+                print("Error writing to file: " + str(e))
+                sys.exit(1)
+            except OSError as e:
+                print("Error writing to file: " + str(e))
+                sys.exit(1)
+    except FileNotFoundError as e:
+        print("Error opening file: " + str(e))
+        sys.exit(1)
+    except PermissionError as e:
+        print("Error opening file: " + str(e))
+        sys.exit(1)
+    except OSError as e:
+        print("Error opening file: " + str(e))
+        sys.exit(1)
+        
+    # Upload the updated html file 
+    
+    client.upload_file(str("index.html"), 'tcb-drone', str("index.html"), ExtraArgs={'ACL':'public-read'})
+    sys.exit(0)
+
