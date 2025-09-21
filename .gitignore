@@ -5,3 +5,6 @@ Labels
 *.keras
 password.json
 *.html
+querycount.txt
+streetview-images/
+numqueries.txt
