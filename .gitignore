@@ -3,6 +3,8 @@ Labels
 *.h5
 *.zip
 *.keras
+password.json
+*.html
 querycount.txt
 streetview-images/
 numqueries.txt

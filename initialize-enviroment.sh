@@ -9,11 +9,15 @@
 # This script should be run just once, after the repo has been cloned and 
 # before any python scripts are run. 
 
+# Name of the training set file, this may change PR to PR. 
+TRAINING_SET=Labels-20250715T043403Z-1-001.zip
+
 # Run with GPU arg to set up tensorflow with cuda. To download cuda toolkit, reference:
 # https://docs.nvidia.com/cuda/cuda-installation-guide-linux
 
 # Verify installation 
 IS_INSTALLED=0
+tf_ver=""
 
 if [[ $1 == "GPU" ]]; then
     tf_ver="tensorflow[and-cuda]"
@@ -40,6 +44,8 @@ fi
 
 # If not already installed, get tensor flow 
 if [[ $IS_INSTALLED -eq 0 ]] then
+    # Delete the tensorflow folder if one exists and is not a verified install 
+    rm -rf tensorflow/
     # Get tensorflow (CPU Version) 
     python3 -m venv tensorflow 
     source tensorflow/bin/activate 
@@ -47,6 +53,8 @@ if [[ $IS_INSTALLED -eq 0 ]] then
     pip install --upgrade ${tf_ver}
     pip install opencv-python
     pip install pyyaml h5py  # Required to save models in HDF5 format
+    pip install botocore 
+    pip install boto3
     
     # Verify installation 
     check_tf_installed
@@ -59,8 +67,15 @@ if [[ $IS_INSTALLED -eq 0 ]] then
     fi
 fi
 
-wget https://tcb-drone.sfo3.digitaloceanspaces.com/Labels-20250715T043403Z-1-001.zip
+# If the training set is not already downloaded, download it  
+if [ ! -f ${TRAINING_SET} ]; then
+    # Get the initial training set 
+    wget https://tcb-drone.sfo3.digitaloceanspaces.com/${TRAINING_SET}
 
-unzip Labels-20250715T043403Z-1-001.zip
+    # unzip the training set 
+    unzip ${TRAINING_SET}
+fi
+
+
 
 
