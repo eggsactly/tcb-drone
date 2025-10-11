@@ -51,7 +51,7 @@ with open("password.json", "r") as file:
         
     # Get the list of files 
     
-    response = cli:nt.list_objects_v2(
+    response = client.list_objects_v2(
         Bucket='tcb-drone',
         Delimiter=' ',
         EncodingType='url'
