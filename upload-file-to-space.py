@@ -7,15 +7,14 @@ import botocore
 import sys
 import json
 
+PROGRAM_NAME=str(sys.argv[0].lstrip('.').lstrip('/'))
+
 if len(sys.argv) < 2:
-    print("error: Must provide name of file in input.")
+    print(PROGRAM_NAME + ": Error: No file provided: Please provide name of file in input.", file=sys.stderr)
     sys.exit(1)
 
 with open("password.json", "r") as file:
     data = json.load(file)
-
-    print(data['aws_access_key_id'])
-    print(data['aws_secret_access_key'])
 
     # Step 2: The new session validates your request and directs it to your Space's specified endpoint using the AWS SDK.
     session = boto3.session.Session()
@@ -33,7 +32,7 @@ with open("password.json", "r") as file:
     spaces = [space['Name'] for space in response['Buckets']]
     print(str(spaces))
     
-    print("Uploading: " + str(sys.argv[1]))
+    print(PROGRAM_NAME + " Info: Uploading: " + str(sys.argv[1]), file=sys.stderr)
     
     # Upload the desired file 
     
@@ -67,19 +66,19 @@ with open("password.json", "r") as file:
                 f.write("</body>")
                 f.write("</html>")
             except IOError as e:
-                print("Error writing to file: " + str(e))
+                print(PROGRAM_NAME + ": Error: writing to file: " + str(e), file=sys.stderr)
                 sys.exit(1)
             except OSError as e:
-                print("Error writing to file: " + str(e))
+                print(PROGRAM_NAME + ": Error: writing to file: " + str(e), file=sys.stderr)
                 sys.exit(1)
     except FileNotFoundError as e:
-        print("Error opening file: " + str(e))
+        print(PROGRAM_NAME + ": Error: opening file: " + str(e), file=sys.stderr)
         sys.exit(1)
     except PermissionError as e:
-        print("Error opening file: " + str(e))
+        print(PROGRAM_NAME + ": Error: opening file: " + str(e), file=sys.stderr)
         sys.exit(1)
     except OSError as e:
-        print("Error opening file: " + str(e))
+        print(PROGRAM_NAME + ": Error: opening file: " + str(e), file=sys.stderr)
         sys.exit(1)
         
     # Upload the updated html file 
