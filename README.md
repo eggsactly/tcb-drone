@@ -26,12 +26,12 @@ First create your `password.json` file in the following format
 ```
 
 Second, upload a new file to the Digital Ocean spaces with the command 
-`space-upload.py [path-to-file]`
+`upload-file-to-space.py [path-to-file]`
 
 You can view files already uploaded by running 
 `./list-files-in-space.py`
 
-You can download them with 
+You can download a file with 
 `./download-file-from-space.sh [file]`
 
 Which is a thin wrapper for wget. 
