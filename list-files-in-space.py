@@ -56,16 +56,18 @@ with open("password.json", "r") as file:
     
     maxlen = 0
     for entry in response['Contents']:
-        if maxlen < len("https://tcb-drone.sfo3.digitaloceanspaces.com/" + str(entry['Key'])):
-            maxlen = len("https://tcb-drone.sfo3.digitaloceanspaces.com/" + str(entry['Key']))
+        if maxlen < len(str(entry['Key'])):
+            maxlen = len(str(entry['Key']))
     
     # We want to sort with respect to time 
     sorted_by_name_desc = sorted(response['Contents'], key=lambda x: x['LastModified'], reverse=False)
     
+    # https://tcb-drone.sfo3.digitaloceanspaces.com/" + 
+    
     print("File path:".ljust(maxlen + 1) + " Size:", file=sys.stderr)
     print("----------".ljust(maxlen + 1) + " -----", file=sys.stderr)
     for entry in sorted_by_name_desc:
-        print(("https://tcb-drone.sfo3.digitaloceanspaces.com/" + str(entry['Key'])).ljust(maxlen + 1) + " " + str(human_readable_bytes(entry['Size'])))
+        print((str(entry['Key'])).ljust(maxlen + 1) + " " + str(human_readable_bytes(entry['Size'])))
 
                
     sys.exit(0)
