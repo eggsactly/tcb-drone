@@ -6,7 +6,7 @@ USER_RESPONSE='y'
 
 if [ $# -lt 1 ] || [ "$1" == "-f" ]
 then 
-    >&2 echo "${0}: Error: No file specified. Please provide name of file to download."
+    >&2 printf "${0}: Error: No file specified. Please provide name of file to download.\n"
     exit 1
 fi
 
@@ -23,8 +23,8 @@ then
    read USER_RESPONSE
 fi
 
-if [ ! "$USER_RESPONSE" == "y" ]; then
-    >&2 echo "${0}: Info: aborting download: ${1}" 
+if [ ! "${USER_RESPONSE,,}" == "y" ]; then
+    >&2 printf "${0}: Info: aborting download: ${1}\n" 
     exit 0
 fi
 
@@ -33,11 +33,11 @@ wget ${URL_PREFIX}${1}
 ERROR=$?
 
 if [ ${ERROR} -ne 0 ]; then 
-    >&2 echo "${0}: Error: Could not download file: " `perror ${ERROR}`
+    >&2 printf "${0}: Error: Could not download file: %s\n" `perror ${ERROR}`
     exit 1
 fi
 
->&2 echo "${0}: Info: download successful: ${1}" 
+>&2 printf "${0}: Info: download successful: ${1}\n" 
 
 exit 0
 
