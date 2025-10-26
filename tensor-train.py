@@ -5,6 +5,9 @@ import sys
 from os import walk
 import cv2
 import numpy as np
+from libs.parse_annotation import *
+
+PROGRAM_NAME=str(sys.argv[0].lstrip('.').lstrip('/'))
 
 print(tf.__version__)
 
@@ -15,12 +18,34 @@ mnist = tf.keras.datasets.mnist
 # DJI_0022.txt files and correlate them with the 
 # DJI_0022.JPG files
 
-TrainingSetPath="Labels"
+TrainingSetPath="Parker"
 checkpoint_path = "TreeIdentifyTensorFlowModel.keras"
-
+indexRecord="classes.txt"
+indexRecordNew="classes.txt.tmp"
 
 # Amount to scale input images by per axis
 imageScaleFactor=0.25
+classesArray = []
+classesFileFound = True
+
+# Read in the classes file, which contains a record of the trees we trained on
+file_path = TrainingSetPath + "/" + indexRecord
+try:
+    with open(file_path, 'r') as file:
+        classesFileFound = True
+        for line in file:
+            # Each 'line' variable will contain one line from the file,
+            # including the newline character at the end (e.g., '\n').
+            # You can process each line here.
+            classesArray.append(line.strip())  # .strip() removes leading/trailing whitespace, including newlines
+except FileNotFoundError:
+    print(PROGRAM_NAME + ": Warning: classes file: " + indexRecord + " not found, if tagged with text format, these images will not be used to train.", file=sys.stderr)
+    classesFileFound = False
+except Exception as e:
+    print(PROGRAM_NAME + ": Warning: classes file: " + indexRecord + " not found, if tagged with text format, these images will not be used to train., exception: " + str(e), file=sys.stderr)
+    classesFileFound = False
+    
+initialClassArrayLen = len(classesArray)
 
 textFileList = []
 jpgFileList = [] 
@@ -29,6 +54,8 @@ for (dirpath, dirnames, filenames) in walk(TrainingSetPath):
         lastPeriod=filename.rfind('.')
         if lastPeriod > 0:
             if filename[lastPeriod:].lower() == ".txt":
+                textFileList.append(filename)
+            if filename[lastPeriod:].lower() == ".xml":
                 textFileList.append(filename)
             elif filename[lastPeriod:].lower() == ".jpg":
                 jpgFileList.append(filename)
@@ -41,7 +68,7 @@ for x in textFileList:
     for y in jpgFileList:
         yLastPeriod=y.rfind('.')
         if x[:xLastPeriod] == y[:yLastPeriod]:
-            xyFileList.append({'image': y, 'text':x})
+            xyFileList.append({'image': y, 'text':x, 'parsed': False})
 
 
 # Open each text file and get the first character before the first space and 
@@ -52,16 +79,40 @@ maxNum = 0
 # Fetch the first value from the input file 
 for x in xyFileList: 
     number_str = ""
-    with open(TrainingSetPath + "/" + x["text"]) as f:
-        while True:
-            c = f.read(1)
-            if not c or c == ' ':
-                break
-            else:
-                number_str = number_str + c
+    xLastPeriod=x["text"].rfind('.')
+    # When the tag file associated with the image is an txt file
+    if x["text"][xLastPeriod:] == '.txt':
+        if not classesFileFound:
+            print(PROGRAM_NAME + ": Error: Not training with: " + str(x["image"]) + " because classes file not found.", file=sys.stderr)
+            break 
+        try:
+            with open(TrainingSetPath + "/" + x["text"], 'r') as f:
+                while True:
+                    c = f.read(1)
+                    if not c or c == ' ':
+                        break
+                    else:
+                        number_str = number_str + c
+        except FileNotFoundError:
+            print(PROGRAM_NAME + ": Warning: classes file: " + str(TrainingSetPath + "/" + x["text"]) + " not found, skipping.", file=sys.stderr)
+            continue
+        except Exception as e:
+            print(PROGRAM_NAME + ": Warning: classes file: " + str(TrainingSetPath + "/" + x["text"]) + " not found, skipping.", file=sys.stderr)
+            continue
+    # When the tag file associated with the image is an xml file
+    elif x["text"][xLastPeriod:] == '.xml':
+        success, width, height, depth, name, xmin, ymin, xmax, ymax, classid = parseDronePicsXml(TrainingSetPath + "/" + x["text"], classesArray)
+        number_str = classid
+        if not success:
+            print(PROGRAM_NAME + ": Warning: Issue parsing: " + str(x["text"]) + " for " + str(x["image"]) + " skipping", file=sys.stderr)
+            continue
+    else:
+        print(PROGRAM_NAME + ": Warning: No parser for extension: " + str(x["text"][xLastPeriod:]) + " for " + str(x["image"]) + " skipping", file=sys.stderr)
+        continue
     number_int = int(number_str)
     #x['y_train_index'] = number_int
     x['y_train'] = number_int
+    x['parsed'] = True
     y_train.append(number_int)
     if number_int > maxNum:
         maxNum = number_int
@@ -75,7 +126,7 @@ imgWidth = 0
 # https://stackoverflow.com/questions/7762948/how-to-convert-an-rgb-image-to-numpy-array
 for x in xyFileList:
     imageFilePath = TrainingSetPath + "/" + x["image"]
-    print("Reading in: " + imageFilePath)
+    print(PROGRAM_NAME + ": Info: Reading in: " + imageFilePath, file=sys.stderr)
     im = cv2.imread(imageFilePath, cv2.COLOR_BGR2RGB) 
     # scale image to be 1/16 the size
     im = cv2.resize(im, (0,0), fx=imageScaleFactor, fy=imageScaleFactor) 
@@ -85,12 +136,13 @@ for x in xyFileList:
         imgHeight = np.size(im, 0)
         imgWidth = np.size(im, 1)
     elif np.size(im, 0) != imgHeight or imgWidth != np.size(im, 1):
-        print("Error: Image height is not like the rest " + str(np.size(im, 0) + " != " + str(imgHeight) + " or " + str(np.size(im, 1)) + " != " + str(imgWidth)))
+        print(PROGRAM_NAME + ": Error:  is not like the rest " + str(np.size(im, 0) + " != " + str(imgHeight) + " or " + str(np.size(im, 1)) + " != " + str(imgWidth)), file=sys.stderr)
         sys.exit(1)
-    
+
     x["x_train"] = im
     #print(str(x["x_train"]))
 
+    
 print("Height: " + str(imgHeight) + " Width: " + str(imgWidth))
 
 # Create the y_train array, it is an array of arrays of floats, the size of 
@@ -102,20 +154,30 @@ print("Height: " + str(imgHeight) + " Width: " + str(imgWidth))
 #    array[x['y_train_index']] = 1.0
 #    x["y_train"] = array
 
-numImages = len(xyFileList)
-
 # Populate the x train and y train arrays 
-x_train = np.vstack([[xyFileList[0]["x_train"]]])
+count = 0
+for n in xyFileList:
+    if n['parsed']:
+        break
+    count = count + 1
+
+x_train = np.vstack([[xyFileList[count]["x_train"]]])
 y_train = np.array(y_train)
 
-count = 0 
-for n in xyFileList[1:]:
-    x_train = np.vstack([x_train, [n["x_train"]]])
+for n in xyFileList[count+1:]:
+    if n['parsed']:
+        x_train = np.vstack([x_train, [n["x_train"]]])
 
 # Verify dimensions 
 if y_train.ndim != 1:
+    print(PROGRAM_NAME + ": Error: y_train.ndim not 1, it is: " + str(y_train.ndim), file=sys.stderr)
     sys.exit(1)
 if x_train.ndim != 4:
+    print(PROGRAM_NAME + ": Error: x_train.ndim not 1, it is: " + str(x_train.ndim), file=sys.stderr)
+    sys.exit(1)
+
+if len(y_train) != len(x_train):
+    print(PROGRAM_NAME + ": Error: Length of training record : " + str(len(y_train)) + " does not equal length of image set: " + str(len(x_train)), file=sys.stderr)
     sys.exit(1)
 
 # Build a machine learning model
@@ -175,4 +237,36 @@ probability_model = tf.keras.Sequential([
 #probability_model(x_test[:5])
 
 model.save(checkpoint_path)
+
+# Take the classesArray that we have built up and write it out to a temporary file
+try:             
+    with open(indexRecordNew, "w") as f:
+        try:
+            # save the classes array
+            for entry in classesArray:
+                f.write(str(entry))
+
+        except IOError as e:
+            print(PROGRAM_NAME + ": Error: writing to file: " + str(e), file=sys.stderr)
+            sys.exit(1)
+        except OSError as e:
+            print(PROGRAM_NAME + ": Error: writing to file: " + str(e), file=sys.stderr)
+            sys.exit(1)
+    
+    if initialClassArrayLen < len(classesArray):
+        print(PROGRAM_NAME + ": Info: classes file: " + str(indexRecordNew) + " has new records added to it. As a developer, please integrate and update these changes to: " + str(indexRecord) + " so that when running the model, users can know what trees have been identified by the model based on ID.", file=sys.stderr)
+    
+except FileNotFoundError as e:
+    print(PROGRAM_NAME + ": Error: writing to file: " + str(e), file=sys.stderr)
+    sys.exit(1)
+except PermissionError as e:
+    print(PROGRAM_NAME + ": Error: writing to file: " + str(e), file=sys.stderr)
+    sys.exit(1)
+except OSError as e:
+    print(PROGRAM_NAME + ": Error: writing to file: " + str(e), file=sys.stderr)
+    sys.exit(1)
+
+
+    
+
 
