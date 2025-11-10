@@ -13,6 +13,12 @@ if len(sys.argv) < 2:
     print(PROGRAM_NAME + ": Error: No file provided: Please provide name of file in input.", file=sys.stderr)
     sys.exit(1)
 
+if len(sys.argv) < 3:
+    print("No file name provided. Defaulting to path as file name.")
+    answer = input("Do you want to continue with path name?:[y/n] ")
+    if (answer != "y" or answer != "Y"):
+        sys.exit(1)
+
 with open("password.json", "r") as file:
     data = json.load(file)
 
@@ -36,8 +42,11 @@ with open("password.json", "r") as file:
     
     # Upload the desired file 
     
-    # Step 3: Call the put_object command and specify the file to upload.
-    client.upload_file(str(sys.argv[1]), 'tcb-drone', str(sys.argv[1]), ExtraArgs={'ACL':'public-read'})
+    # Step 3: Call the put_object command and specify the file to upload. 
+    if len(sys.argv) < 3:
+        client.upload_file(str(sys.argv[1]), 'tcb-drone', str(sys.argv[1]), ExtraArgs={'ACL':'public-read'})
+    else:
+        client.upload_file(str(sys.argv[1]), 'tcb-drone', str(sys.argv[2]), ExtraArgs={'ACL':'public-read'})
         
     # Get the list of files 
     
