@@ -26,7 +26,20 @@ First create your `password.json` file in the following format
 ```
 
 Second, upload a new file to the Digital Ocean spaces with the command 
-`space-upload.py [path-to-file]`
+`upload-file-to-space.py [path-to-file]`
+
+You can view files already uploaded by running 
+`./list-files-in-space.py`
+
+You can download a file with 
+`./download-file-from-space.sh [file]`
+
+Which is a thin wrapper for wget. 
+
+Files can be deleted with
+`./delete-file-from-space.py [file]`
+
+User is required to provide confirmation before completing all file deletions.
 
 # Google Streetview script
 Training images from google's streetview API can be queried by running streetview-query.py. The script expects a google API key in the file `~/.google-api-key`, or in a file specified by `-a/--api_key_file` at the command line. The script queries random locations in a radius around a latitute and longitude coordinate - the radius (in miles), center latitude, and center longitude can be modified by updating the `RADIUS` and `TUCSON_DATA` global variables. By default, the script queries for 5 images, but can query for more by specifying `-n/--numqueries` in the cli.
