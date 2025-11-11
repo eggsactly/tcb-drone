@@ -10,7 +10,7 @@
 # before any python scripts are run. 
 
 # Name of the training set file, this may change PR to PR. 
-TRAINING_SET=Labels-20250715T043403Z-1-001.zip
+TRAINING_SET=Parker.tar.gz
 
 # Run with GPU arg to set up tensorflow with cuda. To download cuda toolkit, reference:
 # https://docs.nvidia.com/cuda/cuda-installation-guide-linux
@@ -73,7 +73,7 @@ if [ ! -f ${TRAINING_SET} ]; then
     wget https://tcb-drone.sfo3.digitaloceanspaces.com/${TRAINING_SET}
 
     # unzip the training set 
-    unzip ${TRAINING_SET}
+    tar -xf ${TRAINING_SET}
 fi
 
 

@@ -11,3 +11,5 @@ password.json
 querycount.txt
 streetview-images/
 numqueries.txt
+__pycache__
+*.tmp
