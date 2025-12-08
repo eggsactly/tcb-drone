@@ -7,11 +7,10 @@ import subprocess
 NoFile = str('nofile.xml')
 TestFile = str('testfile.xml')
 
-def writeTestFile(filename, infoDictList, includeName=True):
+def writeTestFile(filename, width, heigh, depth, infoDictList, includeName=True):
     try:             
         with open(filename, "w") as f:
-            for infoDict in infoDictList:
-                f.write("    <annotation>\n\
+            f.write("    <annotation>\n\
 	    <folder>DronePics</folder>\n\
 	    <filename>DJI_0089.JPG</filename>\n\
 	    <path>/mnt/e/Pics/DronePics/DJI_0089.JPG</path>\n\
@@ -19,12 +18,13 @@ def writeTestFile(filename, infoDictList, includeName=True):
 		    <database>Unknown</database>\n\
 	    </source>\n\
 	    <size>\n\
-		    <width>"+str(infoDict['width'])+"</width>\n\
-		    <height>"+str(infoDict['height'])+"</height>\n\
-		    <depth>"+str(infoDict['depth'])+"</depth>\n\
+		    <width>"+str(width)+"</width>\n\
+		    <height>"+str(height)+"</height>\n\
+		    <depth>"+str(depth)+"</depth>\n\
 	    </size>\n\
-	    <segmented>0</segmented>\n\
-	    <object>\n")
+	    <segmented>0</segmented>\n")
+            for infoDict in infoDictList:
+                f.write("	    <object>\n")
                 if includeName:
                     f.write("		    <name>" + str(infoDict['name']) + "</name>\n")
             
@@ -37,8 +37,8 @@ def writeTestFile(filename, infoDictList, includeName=True):
 			    <xmax>"+str(infoDict['xmax'])+"</xmax>\n\
 			    <ymax>"+str(infoDict['ymax'])+"</ymax>\n\
 		    </bndbox>\n\
-	    </object>\n\
-    </annotation>\n")
+	    </object>\n")
+            f.write("    </annotation>\n")
     
     except FileNotFoundError as e:
         print("Error opening file: " + str(e))
@@ -80,15 +80,15 @@ class TestAddFunction(unittest.TestCase):
         ymax_in = 1495
         speciesList = []
         
-        infoDictList = [{'width': width_in, 'height': height_in, 'depth': depth_in, 'name': name_in, 'xmin': xmin_in, 'ymin': ymin_in, 'xmax': xmax_in, 'ymax': ymax_in}]
+        infoDictList = [{'name': name_in, 'xmin': xmin_in, 'ymin': ymin_in, 'xmax': xmax_in, 'ymax': ymax_in}]
         
-        writeTestFile(TestFile, infoDictList  ymax_in)
-        success, returnList = parseDronePicsXml(TestFile, speciesList)
+        writeTestFile(TestFile, width_in, height_in, depth_in, infoDictList)
+        success, width, height, depth, returnList = parseDronePicsXml(TestFile, speciesList)
         
         self.assertEqual(success, True)
-        self.assertEqual(returnList[0]['width'],  infoDictList[0]['width'])
-        self.assertEqual(returnList[0]['height'], infoDictList[0]['height'])
-        self.assertEqual(returnList[0]['depth'],  infoDictList[0]['depth'])
+        self.assertEqual(width_in,  width)
+        self.assertEqual(height_in, height)
+        self.assertEqual(depth_in,  height)
         self.assertEqual(returnList[0]['name'],   infoDictList[0]['name'])
         self.assertEqual(returnList[0]['xmin'],   infoDictList[0]['xmin'])
         self.assertEqual(returnList[0]['ymin'],   infoDictList[0]['ymin'])
@@ -109,9 +109,9 @@ class TestAddFunction(unittest.TestCase):
         ymax_in = 1495
         speciesList = []
         
-        infoDictList = [{'width': width_in, 'height': height_in, 'depth': depth_in, 'name': name_in, 'xmin': xmin_in, 'ymin': ymin_in, 'xmax': xmax_in, 'ymax': ymax_in}]
-        writeTestFile(TestFile, infoDictList, False)
-        success, width, height, depth, name, xmin, ymin, xmax, ymax, classid = parseDronePicsXml(TestFile, speciesList)
+        infoDictList = [{'name': name_in, 'xmin': xmin_in, 'ymin': ymin_in, 'xmax': xmax_in, 'ymax': ymax_in}]
+        writeTestFile(TestFile, width_in, height_in, depth_in, infoDictList, False)
+        success, width, height, depth, returnList = parseDronePicsXml(TestFile, speciesList)
         
         self.assertEqual(success, False)
 
@@ -127,7 +127,7 @@ class TestAddFunction(unittest.TestCase):
         ymax_in = 1495
         speciesList = []
         
-        infoDictList = [{'width': width_in, 'height': height_in, 'depth': depth_in, 'name': name_in, 'xmin': xmin_in, 'ymin': ymin_in, 'xmax': xmax_in, 'ymax': ymax_in}]
+        infoDictList = [{'name': name_in, 'xmin': xmin_in, 'ymin': ymin_in, 'xmax': xmax_in, 'ymax': ymax_in}]
         
         width_in = 300
         height_in = 200
@@ -139,17 +139,18 @@ class TestAddFunction(unittest.TestCase):
         ymax_in = 25
         speciesList = []
         
-        infoDictList.append({'width': width_in, 'height': height_in, 'depth': depth_in, 'name': name_in, 'xmin': xmin_in, 'ymin': ymin_in, 'xmax': xmax_in, 'ymax': ymax_in})
+        infoDictList.append({'name': name_in, 'xmin': xmin_in, 'ymin': ymin_in, 'xmax': xmax_in, 'ymax': ymax_in})
         
-        writeTestFile(TestFile, infoDictList  ymax_in)
-        success, returnList = parseDronePicsXml(TestFile, speciesList)
+        writeTestFile(TestFile, width_in, height_in, depth_in, infoDictList)
+        success, width, height, depth, returnList = parseDronePicsXml(TestFile, speciesList)
+        
+        self.assertEqual(success, True)
+        self.assertEqual(width_in,  width)
+        self.assertEqual(height_in, height)
+        self.assertEqual(depth_in,  height)
         
         count = 0
         while count < len(infoDictList):
-            self.assertEqual(success, True)
-            self.assertEqual(returnList[count]['width'],  infoDictList[count]['width'])
-            self.assertEqual(returnList[count]['height'], infoDictList[count]['height'])
-            self.assertEqual(returnList[count]['depth'],  infoDictList[count]['depth'])
             self.assertEqual(returnList[count]['name'],   infoDictList[count]['name'])
             self.assertEqual(returnList[count]['xmin'],   infoDictList[count]['xmin'])
             self.assertEqual(returnList[count]['ymin'],   infoDictList[count]['ymin'])
