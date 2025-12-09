@@ -24,6 +24,8 @@ def parseDronePicsXml(path, classes):
         root = ET.parse(path).getroot()
     except FileNotFoundError:
         success = False
+    
+    returnList = []
 
     if success:
         if len(root.findall('size')) > 0:
@@ -36,10 +38,10 @@ def parseDronePicsXml(path, classes):
                 success = False
         else:
             success = False
-        if len(root.findall('object')) > 0:
-            type_tag = root.findall('object')
+            
+        for type_tag in root.findall('object'):
             try:
-                name = str(type_tag[0].findall('name')[0].text)
+                name = str(type_tag.findall('name')[0].text)
                 if name in classes:
                     classid = classes.index(name)
                 else:
@@ -48,17 +50,20 @@ def parseDronePicsXml(path, classes):
             except IndexError:
                 success = False
                 
-            if len(root.findall('object')[0].findall('bndbox')) > 0:
-                type_tag = root.findall('object')[0].findall('bndbox')
+            if len(type_tag.findall('bndbox')) > 0:
+                type_tag2 = type_tag.findall('bndbox')
                 try:
-                    xmin = int(type_tag[0].findall('xmin')[0].text)
-                    ymin = int(type_tag[0].findall('ymin')[0].text)
-                    xmax = int(type_tag[0].findall('xmax')[0].text)
-                    ymax = int(type_tag[0].findall('ymax')[0].text)
+                    xmin = int(type_tag2[0].findall('xmin')[0].text)
+                    ymin = int(type_tag2[0].findall('ymin')[0].text)
+                    xmax = int(type_tag2[0].findall('xmax')[0].text)
+                    ymax = int(type_tag2[0].findall('ymax')[0].text)
+                    
+                    returnList.append({'name': name, 'xmin': xmin, 'ymin': ymin, 'xmax': xmax, 'ymax': ymax, 'classID': classid})
                 except IndexError:
                     success = False
-        else:
-            success = False
+            else:
+                success = False
+
         
-    return success, width, height, depth, name, xmin, ymin, xmax, ymax, classid
+    return success, width, height, depth, returnList
 

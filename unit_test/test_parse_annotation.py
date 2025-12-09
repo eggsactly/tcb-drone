@@ -7,7 +7,7 @@ import subprocess
 NoFile = str('nofile.xml')
 TestFile = str('testfile.xml')
 
-def writeTestFile(filename, width, heigh, depth, infoDictList, includeName=True):
+def writeTestFile(filename, width, height, depth, infoDictList, includeName=True):
     try:             
         with open(filename, "w") as f:
             f.write("    <annotation>\n\
@@ -65,7 +65,7 @@ class TestAddFunction(unittest.TestCase):
 
     # This test shows no success from failed file 
     def test_failed_file_open(self):
-        success, width, height, depth, name, xmin, ymin, xmax, ymax, classid = parseDronePicsXml(NoFile, [])
+        success, width, height, depth, returnList = parseDronePicsXml(NoFile, [])
         self.assertEqual(success, False)
 
     def test_file_open(self):
@@ -80,7 +80,7 @@ class TestAddFunction(unittest.TestCase):
         ymax_in = 1495
         speciesList = []
         
-        infoDictList = [{'name': name_in, 'xmin': xmin_in, 'ymin': ymin_in, 'xmax': xmax_in, 'ymax': ymax_in}]
+        infoDictList = [{'name': name_in, 'xmin': xmin_in, 'ymin': ymin_in, 'xmax': xmax_in, 'ymax': ymax_in, 'classID': 0}]
         
         writeTestFile(TestFile, width_in, height_in, depth_in, infoDictList)
         success, width, height, depth, returnList = parseDronePicsXml(TestFile, speciesList)
@@ -88,14 +88,14 @@ class TestAddFunction(unittest.TestCase):
         self.assertEqual(success, True)
         self.assertEqual(width_in,  width)
         self.assertEqual(height_in, height)
-        self.assertEqual(depth_in,  height)
+        self.assertEqual(depth_in,  depth)
         self.assertEqual(returnList[0]['name'],   infoDictList[0]['name'])
         self.assertEqual(returnList[0]['xmin'],   infoDictList[0]['xmin'])
         self.assertEqual(returnList[0]['ymin'],   infoDictList[0]['ymin'])
         self.assertEqual(returnList[0]['xmax'],   infoDictList[0]['xmax'])
         self.assertEqual(returnList[0]['ymax'],   infoDictList[0]['ymax'])
+        self.assertEqual(returnList[0]['classID'], infoDictList[0]['classID'])
         self.assertEqual(len(speciesList), 1)
-        self.assertEqual(classid, 0)
 
     def test_bad_format(self):
         
@@ -127,19 +127,19 @@ class TestAddFunction(unittest.TestCase):
         ymax_in = 1495
         speciesList = []
         
-        infoDictList = [{'name': name_in, 'xmin': xmin_in, 'ymin': ymin_in, 'xmax': xmax_in, 'ymax': ymax_in}]
+        infoDictList = [{'name': name_in, 'xmin': xmin_in, 'ymin': ymin_in, 'xmax': xmax_in, 'ymax': ymax_in, 'classID': 0}]
         
         width_in = 300
         height_in = 200
         depth_in = 3
-        name_in = "Mesquite"
+        name_in = "Palo Verde"
         xmin_in = 0
         ymin_in = 0
         xmax_in = 25
         ymax_in = 25
         speciesList = []
         
-        infoDictList.append({'name': name_in, 'xmin': xmin_in, 'ymin': ymin_in, 'xmax': xmax_in, 'ymax': ymax_in})
+        infoDictList.append({'name': name_in, 'xmin': xmin_in, 'ymin': ymin_in, 'xmax': xmax_in, 'ymax': ymax_in, 'classID': 1})
         
         writeTestFile(TestFile, width_in, height_in, depth_in, infoDictList)
         success, width, height, depth, returnList = parseDronePicsXml(TestFile, speciesList)
@@ -147,19 +147,19 @@ class TestAddFunction(unittest.TestCase):
         self.assertEqual(success, True)
         self.assertEqual(width_in,  width)
         self.assertEqual(height_in, height)
-        self.assertEqual(depth_in,  height)
+        self.assertEqual(depth_in,  depth)
+        self.assertEqual(len(speciesList), 2)
         
         count = 0
         while count < len(infoDictList):
-            self.assertEqual(returnList[count]['name'],   infoDictList[count]['name'])
-            self.assertEqual(returnList[count]['xmin'],   infoDictList[count]['xmin'])
-            self.assertEqual(returnList[count]['ymin'],   infoDictList[count]['ymin'])
-            self.assertEqual(returnList[count]['xmax'],   infoDictList[count]['xmax'])
-            self.assertEqual(returnList[count]['ymax'],   infoDictList[count]['ymax'])
+            self.assertEqual(returnList[count]['name'],    infoDictList[count]['name'])
+            self.assertEqual(returnList[count]['xmin'],    infoDictList[count]['xmin'])
+            self.assertEqual(returnList[count]['ymin'],    infoDictList[count]['ymin'])
+            self.assertEqual(returnList[count]['xmax'],    infoDictList[count]['xmax'])
+            self.assertEqual(returnList[count]['ymax'],    infoDictList[count]['ymax'])
+            self.assertEqual(returnList[count]['classID'], infoDictList[count]['classID'])
             count = count + 1
-            
-        self.assertEqual(len(speciesList), 2)
-        self.assertEqual(classid, 0)
+        
 
 if __name__ == '__main__':
     unittest.main()
