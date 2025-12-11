@@ -18,9 +18,9 @@ mnist = tf.keras.datasets.mnist
 # DJI_0022.txt files and correlate them with the 
 # DJI_0022.JPG files
 
-TrainingSetPath="Parker"
+TrainingSetPathList=["Parker", "RillitoPark"]
 checkpoint_path = "TreeIdentifyTensorFlowModel.keras"
-indexRecord="classes.txt"
+indexRecord="Parker/classes.txt"
 indexRecordNew="classes.txt.tmp"
 
 # Amount to scale input images by per axis
@@ -29,7 +29,7 @@ classesArray = []
 classesFileFound = True
 
 # Read in the classes file, which contains a record of the trees we trained on
-file_path = TrainingSetPath + "/" + indexRecord
+file_path = indexRecord
 try:
     with open(file_path, 'r') as file:
         classesFileFound = True
@@ -49,16 +49,17 @@ initialClassArrayLen = len(classesArray)
 
 textFileList = []
 jpgFileList = [] 
-for (dirpath, dirnames, filenames) in walk(TrainingSetPath):
-    for filename in filenames:
-        lastPeriod=filename.rfind('.')
-        if lastPeriod > 0:
-            if filename[lastPeriod:].lower() == ".txt":
-                textFileList.append(filename)
-            if filename[lastPeriod:].lower() == ".xml":
-                textFileList.append(filename)
-            elif filename[lastPeriod:].lower() == ".jpg":
-                jpgFileList.append(filename)
+for TrainingSetPath in TrainingSetPathList:
+    for (dirpath, dirnames, filenames) in walk(TrainingSetPath):
+        for filename in filenames:
+            lastPeriod=filename.rfind('.')
+            if lastPeriod > 0:
+                if filename[lastPeriod:].lower() == ".txt":
+                    textFileList.append(TrainingSetPath + "/" + filename)
+                if filename[lastPeriod:].lower() == ".xml":
+                    textFileList.append(TrainingSetPath + "/" + filename)
+                elif filename[lastPeriod:].lower() == ".jpg":
+                    jpgFileList.append(TrainingSetPath + "/" + filename)
 
 # xyFileList contains a dictionary, associating image file with text file 
 xyFileList = []
@@ -86,7 +87,7 @@ for x in xyFileList:
             print(PROGRAM_NAME + ": Error: Not training with: " + str(x["image"]) + " because classes file not found.", file=sys.stderr)
             break 
         try:
-            with open(TrainingSetPath + "/" + x["text"], 'r') as f:
+            with open(x["text"], 'r') as f:
                 while True:
                     c = f.read(1)
                     if not c or c == ' ':
@@ -94,14 +95,14 @@ for x in xyFileList:
                     else:
                         number_str = number_str + c
         except FileNotFoundError:
-            print(PROGRAM_NAME + ": Warning: classes file: " + str(TrainingSetPath + "/" + x["text"]) + " not found, skipping.", file=sys.stderr)
+            print(PROGRAM_NAME + ": Warning: classes file: " + str(x["text"]) + " not found, skipping.", file=sys.stderr)
             continue
         except Exception as e:
-            print(PROGRAM_NAME + ": Warning: classes file: " + str(TrainingSetPath + "/" + x["text"]) + " not found, skipping.", file=sys.stderr)
+            print(PROGRAM_NAME + ": Warning: classes file: " + str(x["text"]) + " not found, skipping.", file=sys.stderr)
             continue
     # When the tag file associated with the image is an xml file
     elif x["text"][xLastPeriod:] == '.xml':
-        success, width, height, depth, treeList = parseDronePicsXml(TrainingSetPath + "/" + x["text"], classesArray)
+        success, width, height, depth, treeList = parseDronePicsXml(x["text"], classesArray)
         if not success:
             print(PROGRAM_NAME + ": Warning: Issue parsing: " + str(x["text"]) + " for " + str(x["image"]) + " skipping", file=sys.stderr)
             continue
@@ -125,7 +126,7 @@ imgWidth = 0
 # Use OpenCV NumPy interface, gotten from: 
 # https://stackoverflow.com/questions/7762948/how-to-convert-an-rgb-image-to-numpy-array
 for x in xyFileList:
-    imageFilePath = TrainingSetPath + "/" + x["image"]
+    imageFilePath = x["image"]
     print(PROGRAM_NAME + ": Info: Reading in: " + imageFilePath, file=sys.stderr)
     im = cv2.imread(imageFilePath, cv2.COLOR_BGR2RGB) 
     # scale image to be 1/16 the size
@@ -244,7 +245,7 @@ try:
         try:
             # save the classes array
             for entry in classesArray:
-                f.write(str(entry))
+                f.write(str(entry) + "\n")
 
         except IOError as e:
             print(PROGRAM_NAME + ": Error: writing to file: " + str(e), file=sys.stderr)
