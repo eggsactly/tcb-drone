@@ -80,7 +80,7 @@ maxNum = 0
 for x in xyFileList: 
     number_str = ""
     xLastPeriod=x["text"].rfind('.')
-    # When the tag file associated with the image is an txt file
+    # When the tag file associated with the image is a txt file
     if x["text"][xLastPeriod:] == '.txt':
         if not classesFileFound:
             print(PROGRAM_NAME + ": Error: Not training with: " + str(x["image"]) + " because classes file not found.", file=sys.stderr)
@@ -101,11 +101,11 @@ for x in xyFileList:
             continue
     # When the tag file associated with the image is an xml file
     elif x["text"][xLastPeriod:] == '.xml':
-        success, width, height, depth, name, xmin, ymin, xmax, ymax, classid = parseDronePicsXml(TrainingSetPath + "/" + x["text"], classesArray)
-        number_str = classid
+        success, width, height, depth, treeList = parseDronePicsXml(TrainingSetPath + "/" + x["text"], classesArray)
         if not success:
             print(PROGRAM_NAME + ": Warning: Issue parsing: " + str(x["text"]) + " for " + str(x["image"]) + " skipping", file=sys.stderr)
             continue
+        number_str = treeList[0]['classID']
     else:
         print(PROGRAM_NAME + ": Warning: No parser for extension: " + str(x["text"][xLastPeriod:]) + " for " + str(x["image"]) + " skipping", file=sys.stderr)
         continue
