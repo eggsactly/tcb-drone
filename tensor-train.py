@@ -18,7 +18,12 @@ mnist = tf.keras.datasets.mnist
 # DJI_0022.txt files and correlate them with the 
 # DJI_0022.JPG files
 
-TrainingSetPathList=["Parker", "RillitoPark"]
+TrainingSetPathList=[
+    "Parker"
+    , "RillitoPark"
+    , "CherryAvePark"
+]
+
 checkpoint_path = "TreeIdentifyTensorFlowModel.keras"
 indexRecord="Parker/classes.txt"
 indexRecordNew="classes.txt.tmp"

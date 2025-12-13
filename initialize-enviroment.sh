@@ -10,7 +10,7 @@
 # before any python scripts are run. 
 
 # Name of the training set file, this may change PR to PR. 
-TRAINING_SET=(Parker.tar.gz RillitoPark)
+TRAINING_SET=(Parker.tar.gz RillitoPark CherryPark)
 
 # Run with GPU arg to set up tensorflow with cuda. To download cuda toolkit, reference:
 # https://docs.nvidia.com/cuda/cuda-installation-guide-linux
