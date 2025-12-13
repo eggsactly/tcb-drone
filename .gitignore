@@ -2,6 +2,9 @@ tensorflow/
 Labels
 *.h5
 *.zip
+*.zip.[0-9]*
+*.tar.gz
+*.tar.gz.[0-9]*
 *.keras
 password.json
 *.html

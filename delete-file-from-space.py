@@ -7,21 +7,14 @@ import botocore
 import sys
 import json
 
-if len(sys.argv) < 2:
-    print("error: Must provide name of file in input.")
-    sys.exit(1)
+PROGRAM_NAME=str(sys.argv[0].lstrip('.').lstrip('/'))
 
-if len(sys.argv) < 3:
-    print("No file name provided. Defaulting to path as file name.")
-    answer = input("Do you want to continue with path name?:[y/n] ")
-    if (answer != "y" or answer != "Y"):
-        sys.exit(1)
+if len(sys.argv) < 2:
+    print(PROGRAM_NAME + ": Error: No file provided: Please provide name of file in input.", file=sys.stderr)
+    sys.exit(1)
 
 with open("password.json", "r") as file:
     data = json.load(file)
-
-    print(data['aws_access_key_id'])
-    print(data['aws_secret_access_key'])
 
     # Step 2: The new session validates your request and directs it to your Space's specified endpoint using the AWS SDK.
     session = boto3.session.Session()
@@ -39,15 +32,41 @@ with open("password.json", "r") as file:
     spaces = [space['Name'] for space in response['Buckets']]
     print(str(spaces))
     
-    print("Uploading: " + str(sys.argv[1]))
+    print(PROGRAM_NAME + " Info: Deleting: " + str(sys.argv[1]), file=sys.stderr)
     
-    # Upload the desired file 
+    fileExists = False
     
-    # Step 3: Call the put_object command and specify the file to upload. 
-    if len(sys.argv) < 3:
-        client.upload_file(str(sys.argv[1]), 'tcb-drone', str(sys.argv[1]), ExtraArgs={'ACL':'public-read'})
+    # Check to see if the file exists 
+    response = client.list_objects_v2(
+        Bucket='tcb-drone',
+        Delimiter=' ',
+        EncodingType='url'
+    )
+    
+    fileList = []
+    for entry in response['Contents']:
+        fileList.append(entry['Key'])
+        if entry['Key'] == sys.argv[1]:
+            fileExists = True
+    
+    if fileExists:
+        print(PROGRAM_NAME + " Query: Are you sure you want to delete: " + str(sys.argv[1]) + "? (y/N): ", file=sys.stderr, end='')
+        shouldDeleteStr = input()
+        shouldDelete = shouldDeleteStr.lower() == "y"
+        
+        if not shouldDelete:
+            print(PROGRAM_NAME + " Info: not deleting: " + str(sys.argv[1]), file=sys.stderr)
+            sys.exit(0)
     else:
-        client.upload_file(str(sys.argv[1]), 'tcb-drone', str(sys.argv[2]), ExtraArgs={'ACL':'public-read'})
+        print(PROGRAM_NAME + " Error: File Not Found: " + str(sys.argv[1]), file=sys.stderr)
+        sys.exit(1)
+    
+    # delete the desired file 
+    
+    # Step 3: Call the delete_object command and specify the file to delete.
+    response = client.delete_object(
+        Bucket='tcb-drone',
+        Key=sys.argv[1])
         
     # Get the list of files 
     
@@ -76,19 +95,19 @@ with open("password.json", "r") as file:
                 f.write("</body>")
                 f.write("</html>")
             except IOError as e:
-                print("Error writing to file: " + str(e))
+                print(PROGRAM_NAME + ": Error: writing to file: " + str(e), file=sys.stderr)
                 sys.exit(1)
             except OSError as e:
-                print("Error writing to file: " + str(e))
+                print(PROGRAM_NAME + ": Error: writing to file: " + str(e), file=sys.stderr)
                 sys.exit(1)
     except FileNotFoundError as e:
-        print("Error opening file: " + str(e))
+        print(PROGRAM_NAME + ": Error: opening file: " + str(e), file=sys.stderr)
         sys.exit(1)
     except PermissionError as e:
-        print("Error opening file: " + str(e))
+        print(PROGRAM_NAME + ": Error: opening file: " + str(e), file=sys.stderr)
         sys.exit(1)
     except OSError as e:
-        print("Error opening file: " + str(e))
+        print(PROGRAM_NAME + ": Error: opening file: " + str(e), file=sys.stderr)
         sys.exit(1)
         
     # Upload the updated html file 
