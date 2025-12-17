@@ -46,6 +46,11 @@ Training images from google's streetview API can be queried by running streetvie
 Note: Rerunning the script with the same inputs will recreate the same images, as the random function is seeded.
 Note: If a randomly generated coordinate does not have available streetview data within 50m, a line will be printed to stdout and no image will be generated for that set of coordinates
 
+# Project Structure 
+
+- libs/ Contains python modules that are imported by other projects
+- unit_test/ Contains self contained tests on project functions 
+
 # Project Progress and Tracking
 A [Trello Board](https://trello.com/b/RLBbTfDf/tcb-drone-survey) is being used
 for project progress and task tracking.

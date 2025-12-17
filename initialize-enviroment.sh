@@ -10,7 +10,7 @@
 # before any python scripts are run. 
 
 # Name of the training set file, this may change PR to PR. 
-TRAINING_SET=Labels-20250715T043403Z-1-001.zip
+TRAINING_SET=(Parker.tar.gz RillitoPark CherryPark)
 
 # Run with GPU arg to set up tensorflow with cuda. To download cuda toolkit, reference:
 # https://docs.nvidia.com/cuda/cuda-installation-guide-linux
@@ -68,14 +68,18 @@ if [[ $IS_INSTALLED -eq 0 ]] then
 fi
 
 # If the training set is not already downloaded, download it  
-if [ ! -f ${TRAINING_SET} ]; then
-    # Get the initial training set 
-    wget https://tcb-drone.sfo3.digitaloceanspaces.com/${TRAINING_SET}
+for t in ${TRAINING_SET[@]}; do
+    if [ ! -f ${t} ] && [ ! -d ${t} ]; then
+        # Get the initial training set 
+        wget https://tcb-drone.sfo3.digitaloceanspaces.com/${t}
 
-    # unzip the training set 
-    unzip ${TRAINING_SET}
-fi
-
+        # unzip the training set 
+        tar -xf ${t}
+    else
+        echo "${0}: info: ${t} Already Downloaded."
+    fi
+    
+done
 
 
 
