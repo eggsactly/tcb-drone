@@ -50,6 +50,7 @@ Note: If a randomly generated coordinate does not have available streetview data
 
 - libs/ Contains python modules that are imported by other projects
 - unit_test/ Contains self contained tests on project functions 
+- train-tree-count.py trains a NN to count the number of trees in an image 
 
 # Project Progress and Tracking
 A [Trello Board](https://trello.com/b/RLBbTfDf/tcb-drone-survey) is being used
