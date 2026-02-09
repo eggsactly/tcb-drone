@@ -33,7 +33,7 @@ wget ${URL_PREFIX}${1}
 ERROR=$?
 
 if [ ${ERROR} -ne 0 ]; then 
-    >&2 printf "${0}: Error: Could not download file: %s\n" `perror ${ERROR}`
+    >&2 printf "${0}: Error: Could not download file: %s\n" "`perror ${ERROR}`"
     exit 1
 fi
 
