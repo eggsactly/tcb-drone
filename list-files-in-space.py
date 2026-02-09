@@ -54,10 +54,19 @@ with open("password.json", "r") as file:
         EncodingType='url'
     )
     
+    fileKeyValuePairList = []
+    
     maxlen = 0
     for entry in response['Contents']:
-        if maxlen < len(str(entry['Key'])):
-            maxlen = len(str(entry['Key']))
+        tempStr = str(entry['Key']).replace('%2F', '/')
+        fileKeyValuePairList.append(
+            {
+                "Key": tempStr
+                ,"Size": entry['Size']
+            }
+        )
+        if maxlen < len(str(tempStr)):
+            maxlen = len(str(tempStr))
     
     # We want to sort with respect to time 
     sorted_by_name_desc = sorted(response['Contents'], key=lambda x: x['LastModified'], reverse=False)
@@ -66,7 +75,7 @@ with open("password.json", "r") as file:
     
     print("File path:".ljust(maxlen + 1) + " Size:", file=sys.stderr)
     print("----------".ljust(maxlen + 1) + " -----", file=sys.stderr)
-    for entry in sorted_by_name_desc:
+    for entry in fileKeyValuePairList:
         print((str(entry['Key'])).ljust(maxlen + 1) + " " + str(human_readable_bytes(entry['Size'])))
 
                
