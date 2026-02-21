@@ -4,7 +4,7 @@ URL_PREFIX="https://tcb-drone.sfo3.digitaloceanspaces.com/"
 FORCE=0
 USER_RESPONSE='y'
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-# Check for apps
+# Check for the presense of utilities 
 HAS_PERROR=$(which perror | wc -l)
 HAS_WGET=$(which wget | wc -l)
 HAS_GREP=$(which grep | wc -l)
@@ -46,6 +46,7 @@ ERROR=$?
 
 # If download was unsuccessful
 # Server issued an error response. Exec format error.
+# This means that the user is trying to download a whole directory 
 if [ ${ERROR} -eq 8 ]; then 
 
     # Check if required applications are installed    
@@ -100,6 +101,7 @@ if [ ${ERROR} -eq 8 ]; then
         shift
         exit 1
     fi
+# If the wget failed because of some other issue besides the user trying to download a directory
 elif [ ${ERROR} -ne 0 ]; then 
     if [ ${HAS_PERROR} -gt 0 ]; then 
         >&2 printf "${0}: Error: Could not download file: %s\n" "`perror ${ERROR}`"
