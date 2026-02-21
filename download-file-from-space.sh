@@ -4,6 +4,7 @@ URL_PREFIX="https://tcb-drone.sfo3.digitaloceanspaces.com/"
 FORCE=0
 USER_RESPONSE='y'
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+# Check for apps
 HAS_PERROR=$(which perror | wc -l)
 HAS_WGET=$(which wget | wc -l)
 HAS_GREP=$(which grep | wc -l)
@@ -39,7 +40,7 @@ if [ ! "${USER_RESPONSE}" == "y" ]; then
 fi
 
 # Attempt to download the file 
-wget ${URL_PREFIX}${1} 
+wget ${URL_PREFIX}${1} 2> /dev/null 
 
 ERROR=$?
 
@@ -66,11 +67,12 @@ if [ ${ERROR} -eq 8 ]; then
         thestring="${thestring}/"
     fi
     
-    numFilesInDir=$(${SCRIPT_DIR}/list-files-in-space.py -n | grep "${thestring}" | wc -l)
-
+    set -o pipefail
+    names=$(${SCRIPT_DIR}/list-files-in-space.py -n 2> /dev/null) 
+    PYTHON_ERROR=$?
+    numFilesInDir=$(echo "$names" | grep "${thestring}" | wc -l)
     if [ ${numFilesInDir} -gt 0 ]; then
-        names=$(${SCRIPT_DIR}/list-files-in-space.py -n | grep "${thestring}")
-        
+        names=$(echo "$names" | grep "${thestring}")
         i=1;
         while read n; do 
           mkdir -p $(dirname ${n}) 
@@ -88,6 +90,15 @@ if [ ${ERROR} -eq 8 ]; then
         done <<< "$names"  
     else
         >&2 printf "${0}: Error: Could not find files in the directory.\n"
+        case ${PYTHON_ERROR} in
+        0) >&2 printf "${0}: Info: list-files-in-space.py indicated: Success. Issue not with list script, file requested is not on the server.\n";;
+        1) >&2 printf "${0}: Info: list-files-in-space.py indicated: password.json not found.\n";;
+        2) >&2 printf "${0}: Info: list-files-in-space.py indicated: boto3 ClientError.\n";;
+        3) >&2 printf "${0}: Info: list-files-in-space.py indicated: boto3 ParamValidationError.\n";;
+        *) >&2 printf "${0}: Info: list-files-in-space.py indicated: Unknown error: %d\n" ${PYTHON_ERROR};;
+        esac
+        shift
+        exit 1
     fi
 elif [ ${ERROR} -ne 0 ]; then 
     if [ ${HAS_PERROR} -gt 0 ]; then 
@@ -99,7 +110,7 @@ elif [ ${ERROR} -ne 0 ]; then
 fi
 
 
->&2 printf "${0}: Info: download complete: ${1}\n" 
+>&2 printf "${0}: Info: download complete for: ${1}\n" 
 
 exit 0
 

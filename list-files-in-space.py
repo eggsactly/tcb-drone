@@ -89,11 +89,11 @@ try:
             
         except botocore.exceptions.ClientError as error:
             print(PROGRAM_NAME + ": Error: " + str(error) + "", file=sys.stderr)
-            sys.exit(1)
+            sys.exit(2)
 
         except botocore.exceptions.ParamValidationError as error:
             print(PROGRAM_NAME + ": Error: " + str(error) + "", file=sys.stderr)
-            sys.exit(1)
+            sys.exit(3)
 
 except FileNotFoundError:
     print(PROGRAM_NAME + ": Error: password.json not found.", file=sys.stderr)
