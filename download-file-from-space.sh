@@ -1,14 +1,21 @@
 #!/usr/bin/bash
 
-URL_PREFIX="https://tcb-drone.sfo3.digitaloceanspaces.com/"
+# download-file-from-space.sh attempts to download the file or directory 
+# specified by the path on the Digital Ocean bucket. 
+# Usage: ./download-file-from-space.sh file-name [-f]
+# -f flag is for force. It will allow files to be overwritten. 
+
+readonly URL_PREFIX="https://tcb-drone.sfo3.digitaloceanspaces.com/"
 FORCE=0
 USER_RESPONSE='y'
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+readonly SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+readonly PYTHON_INTERPRETER=${SCRIPT_DIR}/tensorflow/bin/python
 # Check for the presense of utilities 
-HAS_PERROR=$(which perror | wc -l)
-HAS_WGET=$(which wget | wc -l)
-HAS_GREP=$(which grep | wc -l)
-HAS_TAIL=$(which tail | wc -l)
+readonly HAS_PERROR=$(which perror | wc -l)
+readonly HAS_WGET=$(which wget | wc -l)
+readonly HAS_GREP=$(which grep | wc -l)
+readonly HAS_TAIL=$(which tail | wc -l)
+readonly HAS_PYTHON=$(ls ${PYTHON_INTERPRETER} 2> /dev/null | wc -l) 
 
 if [ ${HAS_WGET} -eq 0 ]; then 
     >&2 printf "${0}: Error: wget is required, but not installed, please install wget.\n"
@@ -57,6 +64,12 @@ if [ ${ERROR} -eq 8 ]; then
     
     if [ ${HAS_GREP} -eq 0 ]; then 
         >&2 printf "${0}: Error: grep is required, please install grep.\n"
+        exit 1
+    fi
+    
+    if [ ${HAS_PYTHON} -eq 0 ]; then 
+        >&2 printf "${0}: Error: python not found.\n"
+        >&2 printf "${0}: Info: Run ./initialize-enviroment.sh and try again.\n"
         exit 1
     fi
     
