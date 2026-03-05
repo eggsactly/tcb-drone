@@ -82,7 +82,7 @@ if [ ${ERROR} -eq 8 ]; then
     fi
     
     set -o pipefail
-    names=$(${SCRIPT_DIR}/list-files-in-space.py -n 2> /dev/null) 
+    names=$(${PYTHON_INTERPRETER} ${SCRIPT_DIR}/list-files-in-space.py -n 2> /dev/null) 
     PYTHON_ERROR=$?
     numFilesInDir=$(echo "$names" | grep "${thestring}" | wc -l)
     if [ ${numFilesInDir} -gt 0 ]; then
