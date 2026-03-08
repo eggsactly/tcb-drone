@@ -101,11 +101,14 @@ if [ ${ERROR} -eq 8 ]; then
           fi
           >&2 printf "${0}: Info: Downloading %s: %s\n" "${URL_PREFIX}${n}" 
           wget ${URL_PREFIX}${n}
-          mv $(basename ${n})  $(dirname ${n}) 
-          if [ $? -gt 0 ]; then 
-            >&2 printf "${0}: Error: Could not download %s: %s\n" "${n}" "`perror ${ERROR}`" 
+          if [ $? -ne 0 ]; then 
+            if [ ${HAS_PERROR} -gt 0 ]; then 
+              >&2 printf "${0}: Error: Could not download %s: %s\n" "${n}" "`perror ${ERROR}`" 
+            else
+              >&2 printf "${0}: Error: Could not download %s: error code: %d\n" "${n}" ${ERROR}
+            fi
           else
-            >&2 printf "${0}: Error: Could not download %s: error code: %d\n" "${n}" ${ERROR}
+            mv `basename ${n}`  `dirname ${n}` 
           fi
           i=$(($i+1)); 
         done <<< "$names"  
