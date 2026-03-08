@@ -1,4 +1,5 @@
 tensorflow/
+FlightRecordParsingLib/
 Labels
 *.h5
 *.zip
