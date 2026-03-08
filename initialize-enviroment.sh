@@ -43,7 +43,7 @@ if [ -f tensorflow/bin/activate  ]; then
 fi
 
 # If not already installed, get tensor flow 
-if [[ $IS_INSTALLED -eq 0 ]] then
+if [[ $IS_INSTALLED -eq 0 ]]; then
     # Delete the tensorflow folder if one exists and is not a verified install 
     rm -rf tensorflow/
     # Get tensorflow (CPU Version) 
@@ -59,7 +59,7 @@ if [[ $IS_INSTALLED -eq 0 ]] then
     # Verify installation 
     check_tf_installed
 
-    if [[ $IS_INSTALLED -gt 0 ]] then
+    if [[ $IS_INSTALLED -gt 0 ]]; then
         echo "Installation Successful"
     else
         echo "Installation unsuccessful"
