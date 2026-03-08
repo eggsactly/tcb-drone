@@ -36,7 +36,7 @@ if [ ${PYTHON_MAJOR} -ne 3 ]; then
     exit 1
 fi
 
-if [ ${PYTHON_MINOR} -le 10 ]; then 
+if [ ${PYTHON_MINOR} -lt 10 ]; then 
     >&2 printf "${0}: Error: python version needs to be 3.10, or higher, your version is: 3.%d.\n" ${PYTHON_MINOR}
     >&2 printf "${0}: Info: please install python3.%d and try again.\n" ${PYTHON_MINOR}
     exit 1
