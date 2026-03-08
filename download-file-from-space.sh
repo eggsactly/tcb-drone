@@ -99,7 +99,14 @@ if [ ${ERROR} -eq 8 ]; then
                  continue 
              fi
           fi
-          wget ${URL_PREFIX}${1} -o ${n}
+          >&2 printf "${0}: Info: Downloading %s: %s\n" "${URL_PREFIX}${n}" 
+          wget ${URL_PREFIX}${n}
+          mv $(basename ${n})  $(dirname ${n}) 
+          if [ $? -gt 0 ]; then 
+            >&2 printf "${0}: Error: Could not download %s: %s\n" "${n}" "`perror ${ERROR}`" 
+          else
+            >&2 printf "${0}: Error: Could not download %s: error code: %d\n" "${n}" ${ERROR}
+          fi
           i=$(($i+1)); 
         done <<< "$names"  
     else
