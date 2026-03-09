@@ -123,7 +123,7 @@ model = tf.keras.models.Sequential([
   tf.keras.layers.Flatten(input_shape=(trainImageHeight, trainImageWidth, 3)),
   tf.keras.layers.Dense(128, activation='relu'),
   tf.keras.layers.Dropout(0.2),
-  tf.keras.layers.Dense(numTreeTypes)
+  tf.keras.layers.Dense(numTreeTypes, activation='softmax')
 ])
 
 print(str(model.summary()))
@@ -137,7 +137,7 @@ predictions
 tf.nn.softmax(predictions).numpy()
 
 # Define a loss function for training using losses.SparseCategoricalCrossentropy:
-loss_fn = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+loss_fn = tf.keras.losses.CategoricalCrossentropy(from_logits=False)
 
 #The loss function takes a vector of ground truth values and a vector of logits and returns a scalar loss for each example. This loss is equal to the negative log probability of the true class: The loss is zero if the model is sure of the correct class.
 
