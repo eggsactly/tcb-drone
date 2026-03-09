@@ -120,9 +120,20 @@ for i in treeList:
 # models are composed of layers. This model uses the Flatten, Dense, and Dropout
 # layers. 
 model = tf.keras.models.Sequential([
-  tf.keras.layers.Flatten(input_shape=(trainImageHeight, trainImageWidth, 3)),
+  tf.keras.layers.Conv2D(
+    32,
+    (3,3),
+    activation='relu',
+    input_shape=(trainImageHeight, trainImageWidth,3)
+  ),
+  tf.keras.layers.MaxPooling2D((2,2)),
+  tf.keras.layers.Conv2D(64,(3,3),activation='relu'),
+  tf.keras.layers.MaxPooling2D((2,2)),
+  tf.keras.layers.Conv2D(128,(3,3),activation='relu'),
+  tf.keras.layers.MaxPooling2D((2,2)),
+  tf.keras.layers.Flatten(),
   tf.keras.layers.Dense(128, activation='relu'),
-  tf.keras.layers.Dropout(0.2),
+  tf.keras.layers.Dropout(0.3),
   tf.keras.layers.Dense(numTreeTypes, activation='softmax')
 ])
 
