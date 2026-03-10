@@ -27,18 +27,21 @@ if [ ${HAS_PYTHON} -eq 0 ]; then
     exit 1
 fi
 
+PYTHON_MAJOR_NEEDED=3
+PYTHON_MINOR_MIN=10
+
 PYTHON_MAJOR=$(python3 --version | grep -Po '[0-9]+\.[0-9]+' | awk '{split($1,a,".");print a[1]}')
 PYTHON_MINOR=$(python3 --version | grep -Po '[0-9]+\.[0-9]+' | awk '{split($1,a,".");print a[2]}')
 
-if [ ${PYTHON_MAJOR} -ne 3 ]; then 
-    >&2 printf "${0}: Error: python version needs to be 3, your version is: %d.\n" ${PYTHON_MAJOR}
-    >&2 printf "${0}: Info: please install python3 and try again.\n" 
+if [ ${PYTHON_MAJOR} -ne ${PYTHON_MAJOR_NEEDED} ]; then 
+    >&2 printf "${0}: Error: python version needs to be %d, your version is: %d.\n" ${PYTHON_MAJOR_NEEDED} ${PYTHON_MAJOR}
+    >&2 printf "${0}: Info: please install python%d and try again.\n" ${PYTHON_MAJOR_NEEDED}
     exit 1
 fi
 
-if [ ${PYTHON_MINOR} -lt 10 ]; then 
+if [ ${PYTHON_MINOR} -lt ${PYTHON_MINOR_MIN} ]; then 
     >&2 printf "${0}: Error: python version needs to be 3.10, or higher, your version is: 3.%d.\n" ${PYTHON_MINOR}
-    >&2 printf "${0}: Info: please install python3.%d and try again.\n" ${PYTHON_MINOR}
+    >&2 printf "${0}: Info: please install python3.%d and try again.\n" ${PYTHON_MINOR_MIN}
     exit 1
 fi
 
