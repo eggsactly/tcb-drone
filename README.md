@@ -31,7 +31,7 @@ Second, upload a new file to the Digital Ocean spaces with the command
 You can view files already uploaded by running 
 `./list-files-in-space.py`
 
-You can download a file with 
+You can download a file or directory, from the digital ocean space, with 
 `./download-file-from-space.sh [file]`
 
 Which is a thin wrapper for wget. 
