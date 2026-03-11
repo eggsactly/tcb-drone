@@ -40,7 +40,7 @@ if [ ${PYTHON_MAJOR} -ne ${PYTHON_MAJOR_NEEDED} ]; then
 fi
 
 if [ ${PYTHON_MINOR} -lt ${PYTHON_MINOR_MIN} ]; then 
-    >&2 printf "${0}: Error: python version needs to be 3.10, or higher, your version is: 3.%d.\n" ${PYTHON_MINOR}
+    >&2 printf "${0}: Error: python version needs to be 3.%d, or higher, your version is: 3.%d.\n" ${PYTHON_MINOR_MIN} ${PYTHON_MINOR}
     >&2 printf "${0}: Info: please install python3.%d and try again.\n" ${PYTHON_MINOR_MIN}
     exit 1
 fi
