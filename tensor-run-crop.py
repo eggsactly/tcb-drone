@@ -12,17 +12,21 @@ import fileinput
 
 PROGRAM_NAME=str(sys.argv[0].lstrip('.').lstrip('/'))
 
-def runModel(model, inputImage):
+trainImageHeight=500
+trainImageWidth=500
+indexRecord="classes-cropped.txt.tmp"
+classesArray = []
+
+def runModel(model, inputImage, x=0, width=0, y=0, height=0):
     file_path = Path(inputImage)
 
     if file_path.exists():
         # Load in the image from inputs from stdin 
         im = cv2.imread(inputImage, cv2.COLOR_BGR2RGB) 
 
-        # We want to set the input image to the size of the images the network was 
-        # trained on 
-        dsize=(resize_width, resize_height)
-        im = cv2.resize(im, dsize) 
+        if width > 0 and height > 0:
+            im = im[y:(y+height), x:(x+width)] 
+        im = cv2.resize(im, (trainImageHeight, trainImageWidth)) 
 
         print(PROGRAM_NAME + ": info: It takes a long time to load the model...", file=sys.stderr)
 
@@ -41,42 +45,23 @@ def runModel(model, inputImage):
                 indexOfHighestValue = index
                 highestValue = probability
             index = index + 1
-
+        
         print(PROGRAM_NAME + ": info: indexOfHighestValue: " + str(indexOfHighestValue), file=sys.stderr)
         print(PROGRAM_NAME + ": info: size of classesArray: " + str(len(classesArray)), file=sys.stderr)
         if indexOfHighestValue >= 0:
             print("\"" + classesArray[indexOfHighestValue] + "\" identified")
+            print(str(result))
         else:
             print("Could not identify tree")
     else:
         print(PROGRAM_NAME + ": warning: Could not find image: \'" + str(inputImage) + "\'", file=sys.stderr)
 
 TrainingSetPath="Labels"
-indexRecord="classes.txt.tmp"
-
-resize_width=1000
-resize_height=562
-maxNum = 3
-checkpoint_path = "TreeIdentifyTensorFlowModel.keras"
-
-def get_model():
-    # Create a simple model.
-    model = tf.keras.models.Sequential([
-        tf.keras.layers.Flatten(input_shape=(resize_height, resize_width, 3)),
-        tf.keras.layers.Dense(128, activation='relu'),
-        tf.keras.layers.Dropout(0.2),
-        tf.keras.layers.Dense(maxNum)
-    ])
-    loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-    model.compile(optimizer='adam',
-              loss=loss_fn,
-              metrics=['accuracy'])
-    return model
-
+checkpoint_path = "TreeIdentifyTensorFlowModelCropped.keras"
 
 print(tf.__version__)
 
-classesArray = []
+
 
 inputImages = []
 
@@ -105,8 +90,9 @@ else:
 
 # If no positional parameters are provided, take input from stdin
 if len(sys.argv) < 2:
-    for inputImage in fileinput.input():
-        runModel(model, inputImage.rstrip())
+    for inputLine in fileinput.input():
+        splitline = inputLine.split()
+        runModel(model, splitline[0], int(splitline[1]), int(splitline[2]), int(splitline[3]), int(splitline[4]))
 else:
     inputImages = sys.argv[1:]
     for inputImage in inputImages:
