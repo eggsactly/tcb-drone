@@ -55,3 +55,8 @@ Note: If a randomly generated coordinate does not have available streetview data
 A [Trello Board](https://trello.com/b/RLBbTfDf/tcb-drone-survey) is being used
 for project progress and task tracking.
 
+# Labelling Images
+The training data for this project is labelled using the python module [LabelImg](https://pypi.org/project/labelImg/). LabelImg allows three different annotation types; we are using the PASCAL VOC format. ![Example labelled drone image](https://tcb-drone.sfo3.digitaloceanspaces.com/LabellingExample.jpg)
+
+# Extracting Drone Flight Logs
+While it is simple to extract video or images the drone produces using an SDA card, extracting the flight logs is less straightforward. The path we have used requires iTunes as an iPhone is used as the drone controller during flight. The images below indicate the steps needed to extract the logs.  ![Step 1 in iTunes](https://tcb-drone.sfo3.digitaloceanspaces.com/iTunes1.png) ![Step 2 in iTunes](https://tcb-drone.sfo3.digitaloceanspaces.com/iTunes2.png)
