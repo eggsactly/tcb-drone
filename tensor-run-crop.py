@@ -17,7 +17,21 @@ trainImageWidth=500
 indexRecord="classes-cropped.txt.tmp"
 classesArray = []
 
-def runModel(model, inputImage, x=0, width=0, y=0, height=0):
+def runModel(model, inputLine):
+    splitline = inputLine.split()
+    
+    inputImage = splitline[0]
+    x=int(0)
+    width=int(0)
+    y=int(0)
+    height=int(0)
+    
+    if len(splitline) >= 5:
+        x=int(splitline[1])
+        width=int(splitline[2])
+        y=int(splitline[3])
+        height=int(splitline[4])
+    
     file_path = Path(inputImage)
 
     if file_path.exists():
@@ -27,8 +41,6 @@ def runModel(model, inputImage, x=0, width=0, y=0, height=0):
         if width > 0 and height > 0:
             im = im[y:(y+height), x:(x+width)] 
         im = cv2.resize(im, (trainImageHeight, trainImageWidth)) 
-
-        print(PROGRAM_NAME + ": info: It takes a long time to load the model...", file=sys.stderr)
 
         image_in_array = np.vstack([[im]])
 
@@ -49,19 +61,23 @@ def runModel(model, inputImage, x=0, width=0, y=0, height=0):
         print(PROGRAM_NAME + ": info: indexOfHighestValue: " + str(indexOfHighestValue), file=sys.stderr)
         print(PROGRAM_NAME + ": info: size of classesArray: " + str(len(classesArray)), file=sys.stderr)
         if indexOfHighestValue >= 0:
-            print("\"" + classesArray[indexOfHighestValue] + "\" identified")
-            print(str(result))
+            print("\"" + classesArray[indexOfHighestValue] + "\" identified ", end='')
+            #print(str(result[0]).replace('\n',''), end='')
+            if len(splitline) > 5:
+                print(" " + str(splitline[5]).replace('\n',''))
+            else:
+                print()
         else:
-            print("Could not identify tree")
+            print("Could not identify tree, ", end='')
     else:
         print(PROGRAM_NAME + ": warning: Could not find image: \'" + str(inputImage) + "\'", file=sys.stderr)
+        
+    return 0
 
 TrainingSetPath="Labels"
 checkpoint_path = "TreeIdentifyTensorFlowModelCropped.keras"
 
-print(tf.__version__)
-
-
+print(PROGRAM_NAME + ": info: version: " + tf.__version__, file=sys.stderr)
 
 inputImages = []
 
@@ -81,6 +97,7 @@ except Exception as e:
     print(PROGRAM_NAME + ": error: An error occurred: {e}", file=sys.stderr)
     sys.exit(1)
 
+print(PROGRAM_NAME + ": info: It takes a long time to load the model...", file=sys.stderr)
 model = tf.keras.models.load_model(checkpoint_path)
 if model is not None:
     print(PROGRAM_NAME + ": info: Model loaded successfully!", file=sys.stderr)
@@ -91,8 +108,8 @@ else:
 # If no positional parameters are provided, take input from stdin
 if len(sys.argv) < 2:
     for inputLine in fileinput.input():
-        splitline = inputLine.split()
-        runModel(model, splitline[0], int(splitline[1]), int(splitline[2]), int(splitline[3]), int(splitline[4]))
+        
+        runModel(model, inputLine)
 else:
     inputImages = sys.argv[1:]
     for inputImage in inputImages:
