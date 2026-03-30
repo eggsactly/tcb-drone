@@ -63,5 +63,5 @@ done
 for i in "${VALIDATION_SET[@]}"
 do
     DIRNAME=$(basename -s .tar.gz ${i})
-    ${PYTHON_INTERPRETER} ${SCRIPT_DIR}/harvest-images.py ${DIRNAME} | ${PYTHON_INTERPRETER} ${SCRIPT_DIR}/tensor-run-crop.py > validate-output.txt 
+    ${PYTHON_INTERPRETER} ${SCRIPT_DIR}/harvest-images.py ${DIRNAME} | ${PYTHON_INTERPRETER} ${SCRIPT_DIR}/tensor-run-crop.py | ${PYTHON_INTERPRETER} ${SCRIPT_DIR}/count-matches.py 
 done
