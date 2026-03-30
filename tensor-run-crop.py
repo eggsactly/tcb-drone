@@ -45,7 +45,7 @@ def runModel(model, inputLine):
         image_in_array = np.vstack([[im]])
 
         # Evaluate the model
-        result = model.predict(image_in_array[:1])
+        result = model.predict(image_in_array[:1], verbose=0)
         print(PROGRAM_NAME + "Result: " + str(result), file=sys.stderr)
 
         index=0
@@ -108,7 +108,6 @@ else:
 # If no positional parameters are provided, take input from stdin
 if len(sys.argv) < 2:
     for inputLine in fileinput.input():
-        
         runModel(model, inputLine)
 else:
     inputImages = sys.argv[1:]
