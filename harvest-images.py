@@ -17,17 +17,18 @@ if len(sys.argv) < 2:
     print(PROGRAM_NAME + ": ERROR: No input parameter provided. Please provide a path to a directory.", file=sys.stderr)
     sys.exit(1)
 
-for (dirpath, dirnames, filenames) in walk(sys.argv[1]):
-    for filename in filenames:
-        lastPeriod=filename.rfind('.')
-        if lastPeriod > 0:
-            if filename[lastPeriod:].lower() == ".xml":
-                textFileList.append(sys.argv[1] + "/" + filename)
-            elif filename[lastPeriod:].lower() == ".jpg":
-                jpgFileList.append(sys.argv[1] + "/" + filename)
-            else:
-                print(PROGRAM_NAME + ": Warning: Unidentified extension: " + str(filename[lastPeriod:]) + " found on file path, " + str(filename) + ", continuing.", file=sys.stderr)
-    
+for validationPath in sys.argv[1:]:
+    for (dirpath, dirnames, filenames) in walk(validationPath):
+        for filename in filenames:
+            lastPeriod=filename.rfind('.')
+            if lastPeriod > 0:
+                if filename[lastPeriod:].lower() == ".xml":
+                    textFileList.append(validationPath + "/" + filename)
+                elif filename[lastPeriod:].lower() == ".jpg":
+                    jpgFileList.append(validationPath + "/" + filename)
+                else:
+                    print(PROGRAM_NAME + ": Warning: Unidentified extension: " + str(filename[lastPeriod:]) + " found on file path, " + str(filename) + ", continuing.", file=sys.stderr)
+        
 # xyFileList contains a dictionary, associating image file with text file 
 xyFileList = []
 # Open each text file and get the first character before the first space and 
