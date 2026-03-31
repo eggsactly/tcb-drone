@@ -55,17 +55,24 @@ Note: If a randomly generated coordinate does not have available streetview data
 ## UML Diagrams
 These UML diagrams document the system. They were created with umlet diagramming tool.
 
+### Use Case Diagram
 ![Use Case Diagram](./uml/tcb_drone_usecase_diagram.svg)
 
-![Execute model sequence diagram](./uml/tcb_drone_execute_model_sequence_diagram.svg)
-
+### Provide tagged data sequence diagram
 ![Provide tagged data sequence diagram](./uml/tcb_drone_provide_tagged_data_sequence_diagram.svg)
 
+### Update model sequence diagram
+![Update model sequence diagram](./uml/tcb_drone_update_model_sequence_diagram.svg)
+
+### Train model sequence diagram
 ![Train model sequence diagram](./uml/tcb_drone_train_model_sequence_diagram.svg)
 
+### Validate model sequence diagram
 ![Validate model sequence diagram](./uml/tcb_drone_validate_model_sequence_diagram.svg)
 
-![Update model sequence diagram](./uml/tcb_drone_update_model_sequence_diagram.svg)
+### Run model sequence diagram
+![Execute model sequence diagram](./uml/tcb_drone_execute_model_sequence_diagram.svg)
+
 
 # Project Progress and Tracking
 A [Trello Board](https://trello.com/b/RLBbTfDf/tcb-drone-survey) is being used
