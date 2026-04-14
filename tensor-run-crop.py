@@ -8,7 +8,7 @@ import os
 import cv2
 import numpy as np
 from pathlib import Path
-import fileinput
+import argparse
 
 PROGRAM_NAME=str(sys.argv[0].lstrip('.').lstrip('/'))
 
@@ -17,7 +17,7 @@ trainImageWidth=500
 indexRecord="classes-cropped.txt.tmp"
 classesArray = []
 
-def runModel(model, inputLine):
+def runModel(model, inputLine, verbose=0):
     splitline = inputLine.split()
     
     inputImage = splitline[0]
@@ -58,8 +58,9 @@ def runModel(model, inputLine):
                 highestValue = probability
             index = index + 1
         
-        print(PROGRAM_NAME + ": info: indexOfHighestValue: " + str(indexOfHighestValue), file=sys.stderr)
-        print(PROGRAM_NAME + ": info: size of classesArray: " + str(len(classesArray)), file=sys.stderr)
+        if verbose > 0: 
+            print(PROGRAM_NAME + ": info: indexOfHighestValue: " + str(indexOfHighestValue), file=sys.stderr)
+            print(PROGRAM_NAME + ": info: size of classesArray: " + str(len(classesArray)), file=sys.stderr)
         if indexOfHighestValue >= 0:
             print("\"" + classesArray[indexOfHighestValue] + "\" identified ", end='')
             #print(str(result[0]).replace('\n',''), end='')
@@ -73,6 +74,11 @@ def runModel(model, inputLine):
         print(PROGRAM_NAME + ": warning: Could not find image: \'" + str(inputImage) + "\'", file=sys.stderr)
         
     return 0
+
+parser = argparse.ArgumentParser()
+parser.add_argument('filenames', nargs='*') 
+parser.add_argument('--verbose', '-v', action='count', default=0)
+args = parser.parse_args()
 
 TrainingSetPath="Labels"
 checkpoint_path = "TreeIdentifyTensorFlowModelCropped.keras"
@@ -106,12 +112,15 @@ else:
     sys.exit(1)
 
 # If no positional parameters are provided, take input from stdin
-if len(sys.argv) < 2:
-    for inputLine in fileinput.input():
-        runModel(model, inputLine)
+if len(args.filenames) == 0:
+    while 1:
+        line = sys.stdin.readline()
+        if not line: break
+        runModel(model, line, args.verbose)
+        
+# If positional arguments are provided 
 else:
-    inputImages = sys.argv[1:]
-    for inputImage in inputImages:
-        runModel(model, inputImage)
+    for inputImage in args.filenames:
+        runModel(model, inputImage, args.verbose)
 
         
