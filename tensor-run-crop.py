@@ -8,28 +8,44 @@ import os
 import cv2
 import numpy as np
 from pathlib import Path
-import fileinput
+import argparse
 
 PROGRAM_NAME=str(sys.argv[0].lstrip('.').lstrip('/'))
 
-def runModel(model, inputImage):
+trainImageHeight=500
+trainImageWidth=500
+indexRecord="classes-cropped.txt.tmp"
+classesArray = []
+
+def runModel(model, inputLine, verbose=0):
+    splitline = inputLine.split()
+    
+    inputImage = splitline[0]
+    x=int(0)
+    width=int(0)
+    y=int(0)
+    height=int(0)
+    
+    if len(splitline) >= 5:
+        x=int(splitline[1])
+        width=int(splitline[2])
+        y=int(splitline[3])
+        height=int(splitline[4])
+    
     file_path = Path(inputImage)
 
     if file_path.exists():
         # Load in the image from inputs from stdin 
         im = cv2.imread(inputImage, cv2.COLOR_BGR2RGB) 
 
-        # We want to set the input image to the size of the images the network was 
-        # trained on 
-        dsize=(resize_width, resize_height)
-        im = cv2.resize(im, dsize) 
-
-        print(PROGRAM_NAME + ": info: It takes a long time to load the model...", file=sys.stderr)
+        if width > 0 and height > 0:
+            im = im[y:(y+height), x:(x+width)] 
+        im = cv2.resize(im, (trainImageHeight, trainImageWidth)) 
 
         image_in_array = np.vstack([[im]])
 
         # Evaluate the model
-        result = model.predict(image_in_array[:1])
+        result = model.predict(image_in_array[:1], verbose=0)
         print(PROGRAM_NAME + "Result: " + str(result), file=sys.stderr)
 
         index=0
@@ -41,42 +57,33 @@ def runModel(model, inputImage):
                 indexOfHighestValue = index
                 highestValue = probability
             index = index + 1
-
-        print(PROGRAM_NAME + ": info: indexOfHighestValue: " + str(indexOfHighestValue), file=sys.stderr)
-        print(PROGRAM_NAME + ": info: size of classesArray: " + str(len(classesArray)), file=sys.stderr)
+        
+        if verbose > 0: 
+            print(PROGRAM_NAME + ": info: indexOfHighestValue: " + str(indexOfHighestValue), file=sys.stderr)
+            print(PROGRAM_NAME + ": info: size of classesArray: " + str(len(classesArray)), file=sys.stderr)
         if indexOfHighestValue >= 0:
-            print("\"" + classesArray[indexOfHighestValue] + "\" identified")
+            print("\"" + classesArray[indexOfHighestValue] + "\" identified ", end='')
+            #print(str(result[0]).replace('\n',''), end='')
+            if len(splitline) > 5:
+                print(" " + str(splitline[5]).replace('\n',''))
+            else:
+                print()
         else:
-            print("Could not identify tree")
+            print("Could not identify tree, ", end='')
     else:
         print(PROGRAM_NAME + ": warning: Could not find image: \'" + str(inputImage) + "\'", file=sys.stderr)
+        
+    return 0
+
+parser = argparse.ArgumentParser()
+parser.add_argument('filenames', nargs='*') 
+parser.add_argument('--verbose', '-v', action='count', default=0)
+args = parser.parse_args()
 
 TrainingSetPath="Labels"
-indexRecord="classes.txt.tmp"
+checkpoint_path = "TreeIdentifyTensorFlowModelCropped.keras"
 
-resize_width=1000
-resize_height=562
-maxNum = 3
-checkpoint_path = "TreeIdentifyTensorFlowModel.keras"
-
-def get_model():
-    # Create a simple model.
-    model = tf.keras.models.Sequential([
-        tf.keras.layers.Flatten(input_shape=(resize_height, resize_width, 3)),
-        tf.keras.layers.Dense(128, activation='relu'),
-        tf.keras.layers.Dropout(0.2),
-        tf.keras.layers.Dense(maxNum)
-    ])
-    loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-    model.compile(optimizer='adam',
-              loss=loss_fn,
-              metrics=['accuracy'])
-    return model
-
-
-print(tf.__version__)
-
-classesArray = []
+print(PROGRAM_NAME + ": info: version: " + tf.__version__, file=sys.stderr)
 
 inputImages = []
 
@@ -96,6 +103,7 @@ except Exception as e:
     print(PROGRAM_NAME + ": error: An error occurred: {e}", file=sys.stderr)
     sys.exit(1)
 
+print(PROGRAM_NAME + ": info: It takes a long time to load the model...", file=sys.stderr)
 model = tf.keras.models.load_model(checkpoint_path)
 if model is not None:
     print(PROGRAM_NAME + ": info: Model loaded successfully!", file=sys.stderr)
@@ -104,12 +112,15 @@ else:
     sys.exit(1)
 
 # If no positional parameters are provided, take input from stdin
-if len(sys.argv) < 2:
-    for inputImage in fileinput.input():
-        runModel(model, inputImage.rstrip())
+if len(args.filenames) == 0:
+    while 1:
+        line = sys.stdin.readline()
+        if not line: break
+        runModel(model, line, args.verbose)
+        
+# If positional arguments are provided 
 else:
-    inputImages = sys.argv[1:]
-    for inputImage in inputImages:
-        runModel(model, inputImage)
+    for inputImage in args.filenames:
+        runModel(model, inputImage, args.verbose)
 
         

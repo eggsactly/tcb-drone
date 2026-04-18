@@ -11,9 +11,6 @@ PROGRAM_NAME=str(sys.argv[0].lstrip('.').lstrip('/'))
 
 print(tf.__version__)
 
-# Import TensorFLow into your program to get started 
-mnist = tf.keras.datasets.mnist
-
 # Load the dataset, look in the 'Lables' directory and find the 
 # DJI_0022.txt files and correlate them with the 
 # DJI_0022.JPG files

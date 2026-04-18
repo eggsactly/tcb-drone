@@ -14,9 +14,9 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 if len(sys.argv) < 3:
-    print("No file name provided. Defaulting to path as file name.")
+    print(PROGRAM_NAME + "Warning: No destination file name provided. Defaulting to path as file name.", file=sys.stderr)
     answer = input("Do you want to continue with path name?:[y/n] ")
-    if (answer != "y" or answer != "Y"):
+    if (answer != "y" and answer != "Y"):
         sys.exit(1)
 
 with open("password.json", "r") as file:
