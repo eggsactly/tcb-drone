@@ -147,7 +147,7 @@ if args.visual:
             numskip += 1
             continue
         plt.subplot(num_rows, 2*num_cols, 2*i+1)
-        plot_image(i + numskip, predictions[i + numskip], test_labels, test_images, classesArray)
+        plot_image(i + numskip, test_labels, test_images, classesArray, predictions_array=predictions[i + numskip])
         plt.subplot(num_rows, 2*num_cols, 2*i+2)
         plot_value_array(i + numskip, predictions[i + numskip], test_labels, classesArray)
         i+=1

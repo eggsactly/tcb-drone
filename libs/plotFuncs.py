@@ -3,7 +3,7 @@ matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 
-def plot_image(i, predictions_array, true_label, img, classesArray):
+def plot_image(i, true_label, img, classesArray, predictions_array=[]):
     true_label, img = classesArray.index(true_label[i]), img[i]
     plt.grid(False)
     plt.xticks([])
@@ -11,26 +11,20 @@ def plot_image(i, predictions_array, true_label, img, classesArray):
 
     plt.imshow(img, cmap=plt.cm.binary)
 
-    predicted_label = np.argmax(predictions_array)
-    if predicted_label == true_label:
-        color = 'blue'
-    else:
-        color = 'red'
+    if len(predictions_array) > 0:
+        predicted_label = np.argmax(predictions_array)
+        if predicted_label == true_label:
+            color = 'blue'
+        else:
+            color = 'red'
 
-    plt.xlabel("{} {:2.0f}% ({})".format(classesArray[predicted_label],
+    if len(predictions_array) > 0:
+        plt.xlabel("{} {:2.0f}% ({})".format(classesArray[predicted_label],
                                     100*np.max(predictions_array),
                                     classesArray[true_label]),
                                     color=color)
-    
-def plot_image(i, true_label, img, classesArray):
-      true_label, img = classesArray.index(true_label[i]), img[i]
-      plt.grid(False)
-      plt.xticks([])
-      plt.yticks([])
-
-      plt.imshow(img, cmap=plt.cm.binary)
-
-      plt.xlabel("{}".format(classesArray[true_label]))
+    else:
+        plt.xlabel("{}".format(classesArray[true_label]))
 
 def plot_value_array(i, predictions_array, true_label, classesArray):
     true_label = classesArray.index(true_label[i])
